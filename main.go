@@ -1,22 +1,36 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/http"
 	"math/rand"
-	"time"
+	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"sync"
+	"syscall"
+	"time"
+
 	"github.com/gorilla/mux"
 )
 
 var (
-	urlMap = make(map[string]string)
-	baseURL = "http://localhost:8080/"
+	urlMap   = make(map[string]string)
+	baseURL  = "http://localhost:8080/"
+	dataFile = "url_data.json"
+	mu       sync.Mutex
 )
 
-func main() {
-	r := mux.NewRouter()
+type URLData struct {
+	ShortURL string `json:"short_url"`
+	LongURL  string `json:"long_url"`
+}
 
+func main() {
+	loadURLData()
+
+	r := mux.NewRouter()
 	r.HandleFunc("/", homeHandler)
 	r.HandleFunc("/shorten", shortenHandler)
 	r.HandleFunc("/{shortURL}", redirectHandler)
@@ -24,7 +38,64 @@ func main() {
 	http.Handle("/", r)
 
 	fmt.Println("Server started on :8080")
-	http.ListenAndServe(":8080", nil)
+
+	// 創建一個關閉通道，用於在伺服器關閉時通知
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		if err := http.ListenAndServe(":8080", nil); err != nil {
+			fmt.Println("Error starting server:", err)
+			shutdown <- syscall.SIGTERM
+		}
+	}()
+
+	<-shutdown    // 等待關閉通知
+	saveURLData() // 在伺服器關閉前保存資料
+}
+
+func loadURLData() {
+	if _, err := os.Stat(dataFile); os.IsNotExist(err) {
+		return
+	}
+
+	fileContent, err := os.ReadFile(dataFile)
+	if err != nil {
+		fmt.Println("Error reading data file:", err)
+		return
+	}
+
+	var savedURLs []URLData
+	err = json.Unmarshal(fileContent, &savedURLs)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return
+	}
+
+	for _, urlData := range savedURLs {
+		urlMap[urlData.ShortURL] = urlData.LongURL
+	}
+}
+
+func saveURLData() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var savedURLs []URLData
+	for shortURL, longURL := range urlMap {
+		savedURLs = append(savedURLs, URLData{ShortURL: shortURL, LongURL: longURL})
+	}
+
+	data, err := json.MarshalIndent(savedURLs, "", "    ")
+	if err != nil {
+		fmt.Println("Error encoding JSON:", err)
+		return
+	}
+
+	err = os.WriteFile(dataFile, data, 0644)
+	if err != nil {
+		fmt.Println("Error writing data file:", err)
+	}
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
