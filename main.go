@@ -112,6 +112,11 @@ func shortenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !strings.HasPrefix(longURL, "http://") && !strings.HasPrefix(longURL, "https://") {
+		http.Error(w, "URL must start with http:// or https://", http.StatusBadRequest)
+		return
+	}
+
 	shortURL := generateShortURL()
 	urlMap[shortURL] = longURL
 
@@ -135,11 +140,13 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 
 func generateShortURL() string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	rand.Seed(time.Now().UnixNano())
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
 	var sb strings.Builder
 
 	for i := 0; i < 6; i++ {
-		sb.WriteByte(letters[rand.Intn(len(letters))])
+		sb.WriteByte(letters[r.Intn(len(letters))])
 	}
 
 	return sb.String()
