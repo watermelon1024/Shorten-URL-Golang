@@ -97,6 +97,11 @@ func saveURLData() {
 		fmt.Println("Error writing data file:", err)
 	}
 }
+func log(r *http.Request) {
+	requestTime := time.Now().Format("2006-01-02 15:04:05")
+
+	fmt.Printf("%s - %s - \"%s %s %s\"\n", r.RemoteAddr, requestTime, r.Method, r.URL.Path, r.Proto)
+}
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -104,6 +109,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func shortenHandler(w http.ResponseWriter, r *http.Request) {
+	log(r)
+
 	r.ParseForm()
 	longURL := r.Form.Get("url")
 
@@ -126,6 +133,8 @@ func shortenHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
+	log(r)
+
 	vars := mux.Vars(r)
 	shortURL := vars["shortURL"]
 
