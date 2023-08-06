@@ -104,7 +104,7 @@ func saveURLData() {
 func log(r *http.Request, StatusCode int) {
 	requestTime := time.Now().Format("2006-01-02 15:04:05")
 
-	fmt.Printf(`%s - %s - "%s %s %s" - %d\n`, r.RemoteAddr, requestTime, r.Method, r.URL.Path, r.Proto, StatusCode)
+	fmt.Printf(`%s - %s - "%s %s %s" - %d`+"\n", r.RemoteAddr, requestTime, r.Method, r.URL.Path, r.Proto, StatusCode)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
