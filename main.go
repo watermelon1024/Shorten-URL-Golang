@@ -97,30 +97,31 @@ func saveURLData() {
 		fmt.Println("Error writing data file:", err)
 	}
 }
-func log(r *http.Request) {
+func log(r *http.Request, StatusCode int) {
 	requestTime := time.Now().Format("2006-01-02 15:04:05")
 
-	fmt.Printf("%s - %s - \"%s %s %s\"\n", r.RemoteAddr, requestTime, r.Method, r.URL.Path, r.Proto)
+	fmt.Printf(`%s - %s - "%s %s %s" - %d\n`, r.RemoteAddr, requestTime, r.Method, r.URL.Path, r.Proto, StatusCode)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Welcome to the URL shortener service!"))
+	log(r, http.StatusOK)
 }
 
 func shortenHandler(w http.ResponseWriter, r *http.Request) {
-	log(r)
-
 	r.ParseForm()
 	longURL := r.Form.Get("url")
 
 	if longURL == "" {
 		http.Error(w, "URL is required", http.StatusBadRequest)
+		log(r, http.StatusBadRequest)
 		return
 	}
 
 	if !strings.HasPrefix(longURL, "http://") && !strings.HasPrefix(longURL, "https://") {
 		http.Error(w, "URL must start with http:// or https://", http.StatusBadRequest)
+		log(r, http.StatusBadRequest)
 		return
 	}
 
@@ -130,21 +131,22 @@ func shortenHandler(w http.ResponseWriter, r *http.Request) {
 	shortenedURL := baseURL + shortURL
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Shortened URL: " + shortenedURL))
+	log(r, http.StatusOK)
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	log(r)
-
 	vars := mux.Vars(r)
 	shortURL := vars["shortURL"]
 
 	longURL, exists := urlMap[shortURL]
 	if !exists {
 		http.NotFound(w, r)
+		log(r, http.StatusNotFound)
 		return
 	}
 
 	http.Redirect(w, r, longURL, http.StatusSeeOther)
+	log(r, http.StatusTemporaryRedirect)
 }
 
 func generateShortURL() string {
