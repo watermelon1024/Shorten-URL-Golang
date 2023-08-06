@@ -22,6 +22,10 @@ var (
 	mu       sync.Mutex
 )
 
+const (
+	letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+)
+
 type URLData struct {
 	ShortURL string `json:"short_url"`
 	LongURL  string `json:"long_url"`
@@ -150,7 +154,6 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateShortURL() string {
-	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
 
