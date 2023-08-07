@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -47,7 +46,6 @@ func main() {
 			return
 		}
 
-		fmt.Println(data)
 		if !HasIsURL(data.URL) {
 			ctx.JSON(400, gin.H{"error": "invalid url"})
 			ctx.Abort()
