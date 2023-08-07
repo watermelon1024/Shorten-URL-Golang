@@ -30,7 +30,7 @@ func (r HTML) Render(w http.ResponseWriter) (err error) {
 // WriteContentType (JSON) writes JSON ContentType.
 func (r HTML) WriteContentType(w http.ResponseWriter) {
 	header := w.Header()
-	if val := header["Content-Type"]; len(val) == 0 {
+	if len(header["Content-Type"]) == 0 {
 		header["Content-Type"] = []string{"text/html; charset=utf-8"}
 	}
 }
