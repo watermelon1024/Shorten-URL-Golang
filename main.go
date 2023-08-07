@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"sync"
 	"syscall"
@@ -16,6 +17,7 @@ import (
 )
 
 var (
+	reURL    = regexp.MustCompile(`(https?)://([^\s]+\.)?([^\s^/]+\.[^\s^/]{2,}/?)([^\s]+)?`)
 	urlMap   = make(map[string]string)
 	baseURL  = "http://localhost:8080/"
 	dataFile = "url_data.json"
@@ -101,10 +103,15 @@ func saveURLData() {
 		fmt.Println("Error writing data file:", err)
 	}
 }
+
 func log(r *http.Request, StatusCode int) {
 	requestTime := time.Now().Format("2006-01-02 15:04:05")
 
 	fmt.Printf(`%s - %s - "%s %s %s" - %d`+"\n", r.RemoteAddr, requestTime, r.Method, r.URL.Path, r.Proto, StatusCode)
+}
+
+func isValidURL(urlStr string) bool {
+	return reURL.MatchString(urlStr)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -123,8 +130,8 @@ func shortenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !strings.HasPrefix(longURL, "http://") && !strings.HasPrefix(longURL, "https://") {
-		http.Error(w, "URL must start with http:// or https://", http.StatusBadRequest)
+	if !isValidURL(longURL) {
+		http.Error(w, "Invalid URL format", http.StatusBadRequest)
 		log(r, http.StatusBadRequest)
 		return
 	}
