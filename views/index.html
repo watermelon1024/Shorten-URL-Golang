@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>index</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        display: grid;
+        height: 100vh;
+      }
+      .content {
+        margin: auto;
+        text-align: center;
+      }
+      #response {
+        margin-top: 20px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <form id="post">
+        <input type="text" id="original_url" pattern="^https?:\/\/.+" />
+        <button type="submit">生成</button>
+      </form>
+      <div id="response"></div>
+    </div>
+    <script>
+      window.addEventListener('load', () => {
+        const responseEl = document.getElementById('response');
+        const postEl = document.getElementById('post');
+        const urlEl = document.getElementById('original_url');
+
+        postEl.addEventListener('submit', (el) => {
+          el.preventDefault();
+
+          fetch('/api/shorten', {
+            method: 'POST',
+            body: JSON.stringify({ url: urlEl.value }),
+          })
+            .then((d) => d.json())
+            .then(({ error, shorten }) => {
+              if (error) alert('無效的網址');
+              else {
+                const url = `${location.origin}/s/${encodeURI(shorten)}`;
+
+                responseEl.innerHTML = `<a href="${url}">${url}</a>`;
+              }
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
