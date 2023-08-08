@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"net"
-	"net/url"
 	"os"
-	"strings"
+	"regexp"
 	"sync"
 )
 
@@ -25,6 +23,8 @@ var (
 	// [k: LongURL as string]: ShortURL as string
 	longURLCache = map[string]string{}
 	fileLock     sync.Mutex
+	// URL validation regex
+	reURL = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,}/?)([\S]+)?`)
 )
 
 func init() {
@@ -100,14 +100,5 @@ func GetURL(shortURL string) (longURL string, ok bool) {
 }
 
 func isValidURL(addr string) bool {
-	url, err := url.ParseRequestURI(addr)
-	if err != nil || !strings.HasPrefix(url.Scheme, "http") {
-		return false
-	}
-
-	if net.ParseIP(url.Host) == nil {
-		return strings.Contains(url.Host, ".")
-	}
-
-	return true
+	return reURL.MatchString(addr)
 }
