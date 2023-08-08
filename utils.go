@@ -99,7 +99,7 @@ func GetURL(shortURL string) (longURL string, ok bool) {
 	return
 }
 
-func HasIsURL(addr string) bool {
+func isValidURL(addr string) bool {
 	url, err := url.ParseRequestURI(addr)
 	if err != nil || !strings.HasPrefix(url.Scheme, "http") {
 		return false

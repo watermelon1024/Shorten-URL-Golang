@@ -46,7 +46,7 @@ func main() {
 			return
 		}
 
-		if !HasIsURL(data.URL) {
+		if !isValidURL(data.URL) {
 			ctx.JSON(400, gin.H{"error": "invalid url"})
 			ctx.Abort()
 			return
