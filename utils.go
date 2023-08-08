@@ -101,7 +101,6 @@ func GetURL(shortURL string) (longURL string, ok bool) {
 
 func HasIsURL(addr string) bool {
 	url, err := url.ParseRequestURI(addr)
-	fmt.Println(err)
 	if err != nil || !strings.HasPrefix(url.Scheme, "http") {
 		return false
 	}
