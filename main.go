@@ -29,7 +29,7 @@ func main() {
 		}
 	})
 
-	router.GET("/s/:url", func(ctx *gin.Context) {
+	router.GET("/:url", func(ctx *gin.Context) {
 		url := ctx.Param("url")
 		if longURL, ok := urlCache[url]; ok {
 			ctx.Redirect(http.StatusMovedPermanently, longURL)

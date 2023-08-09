@@ -49,7 +49,7 @@
             .then(({ error, shorten }) => {
               if (error) alert('無效的網址');
               else {
-                const url = `${location.origin}/s/${encodeURI(shorten)}`;
+                const url = `${location.origin}/${encodeURI(shorten)}`;
 
                 responseEl.innerHTML = `<a href="${url}">${url}</a>`;
               }
