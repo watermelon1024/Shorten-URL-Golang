@@ -35,6 +35,8 @@ func main() {
 			ctx.Redirect(http.StatusMovedPermanently, longURL)
 			return
 		}
+
+		AddFileHandler(webViews)(ctx)
 	})
 
 	apiRouter := router.Group("/api")
