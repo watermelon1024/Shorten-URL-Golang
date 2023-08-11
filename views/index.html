@@ -1,61 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>URL Shortener</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        display: grid;
-        height: 100vh;
-      }
-      .content {
-        margin: auto;
-        text-align: center;
-      }
-      #response {
-        margin-top: 20px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="content">
-      <form id="post">
-        <input type="text" id="original_url" pattern="^https?:\/\/.+" />
-        <button type="submit">生成</button>
-      </form>
-      <div id="response"></div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>URL Shortener</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+
+    input[type="text"] {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .url-box {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-top: 10px;
+      padding: 5px;
+      background-color: white;
+      color: black;
+    }
+
+    #shortened-link {
+      flex-grow: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    #copy-button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #copy-button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>URL Shortener</h1>
+    <input type="text" id="urlInput" placeholder="Original URL">
+    <button id="shortenButton">Shorten the URL!</button>
+    <div class="url-box" id="shortened-url">
+      <span id="shortened-link"></span>
+      <button id="copy-button">Copy</button>
     </div>
-    <script>
-      window.addEventListener('load', () => {
-        const responseEl = document.getElementById('response');
-        const postEl = document.getElementById('post');
-        const urlEl = document.getElementById('original_url');
+  </div>
 
-        postEl.addEventListener('submit', (el) => {
-          el.preventDefault();
+  <script>
+    const shortenButton = document.getElementById("shortenButton");
+    const urlInput = document.getElementById("urlInput");
+    const shortenedLink = document.getElementById("shortened-link");
+    const copyButton = document.getElementById("copy-button");
 
-          fetch('/api/shorten', {
-            method: 'POST',
-            body: JSON.stringify({ url: urlEl.value }),
-          })
-            .then((d) => d.json())
-            .then(({ error, shorten }) => {
-              if (error) alert('無效的網址');
-              else {
-                const url = `${location.origin}/${encodeURI(shorten)}`;
-
-                responseEl.innerHTML = `<a href="${url}">${url}</a>`;
-              }
-            });
+    shortenButton.addEventListener("click", async () => {
+      fetch('/api/shorten', {
+        method: 'POST',
+        body: JSON.stringify({ url: urlInput.value }),
+      })
+        .then((d) => d.json())
+        .then(({ error, shorten }) => {
+          if (error) alert('Invalid URL Format');
+          else {
+            const shortenedUrl = `${location.origin}/${encodeURI(shorten)}`;
+            shortenedLink.textContent = shortenedUrl;
+            shortenedLink.setAttribute("data-url", shortenedUrl);
+            shortenedLink.style.display = "inline-block";
+            copyButton.style.display = "inline-block";
+          }
         });
-      });
-    </script>
-  </body>
+    });
+
+    copyButton.addEventListener("click", () => {
+      const shortenedUrl = shortenedLink.getAttribute("data-url");
+      const tempInput = document.createElement("input");
+      tempInput.value = shortenedUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+    });
+  </script>
+</body>
+
 </html>
