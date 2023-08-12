@@ -31,8 +31,9 @@ func main() {
 
 	router.GET("/:url", func(ctx *gin.Context) {
 		url := ctx.Param("url")
-		if longURL, ok := urlCache[url]; ok {
-			ctx.Redirect(http.StatusMovedPermanently, longURL)
+		if urlData, ok := urlCache[url]; ok {
+			urlData.increaseCount(url)
+			ctx.Redirect(http.StatusMovedPermanently, urlData.LongURL)
 			return
 		}
 

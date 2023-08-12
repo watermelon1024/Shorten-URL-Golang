@@ -9,6 +9,11 @@ import (
 	"sync"
 )
 
+type URLData struct {
+	LongURL string `json:"url"`
+	Count   int    `json:"count"`
+}
+
 const (
 	DATA_PATH  = "urls.json"
 	SHORT_KEYS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -17,8 +22,8 @@ const (
 var (
 	SHORT_LEN = len(SHORT_KEYS)
 	// short -> long
-	// [k: ShortURL as string]: LongURL as string
-	urlCache = map[string]string{}
+	// [k: ShortURL as string]: LongURL as URLData struct
+	urlCache = map[string]URLData{}
 	// long -> short
 	// [k: LongURL as string]: ShortURL as string
 	longURLCache = map[string]string{}
@@ -48,7 +53,7 @@ func updateCacheURLData() (err error) {
 
 	// Update longURLCache
 	for short, long := range urlCache {
-		longURLCache[long] = short
+		longURLCache[long.LongURL] = short
 	}
 
 	return
@@ -87,18 +92,29 @@ SUMMON:
 		goto SUMMON
 	}
 
-	urlCache[shortURL] = longURL
+	urlCache[shortURL] = URLData{LongURL: longURL, Count: 0}
 	longURLCache[longURL] = shortURL
 	saveCacheURLData()
 
 	return shortURL
 }
 
-func GetURL(shortURL string) (longURL string, ok bool) {
-	longURL, ok = urlCache[shortURL]
+func GetURL(shortURL string) (urlData URLData, ok bool) {
+	urlData, ok = urlCache[shortURL]
 	return
 }
 
 func isValidURL(addr string) bool {
 	return reURL.MatchString(addr)
+}
+
+func (urlData URLData) increaseCount(shortURL string) (err error) {
+	fileLock.Lock()
+	defer fileLock.Unlock()
+
+	urlData.Count++
+	urlCache[shortURL] = urlData
+	err = saveCacheURLData()
+
+	return
 }
