@@ -84,10 +84,17 @@
       padding: 5px 10px;
       font-size: 14px;
       cursor: pointer;
+      transition: background-color 0.6s, color 0.5s, transform 0.3s;
     }
 
     #copy-button:hover {
       background-color: #45a049;
+    }
+
+    #copy-button.copied {
+      background-color: #58ca5d;
+      color: white;
+      transform: scale(1.02);
     }
   </style>
 </head>
@@ -135,6 +142,13 @@
       tempInput.select();
       document.execCommand("copy");
       document.body.removeChild(tempInput);
+
+      copyButton.classList.add("copied");
+      copyButton.textContent = "Copied!";
+      setTimeout(() => {
+        copyButton.classList.remove("copied");
+        copyButton.textContent = "Copy";
+      }, 2000);
     });
   </script>
 </body>
