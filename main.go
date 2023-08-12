@@ -29,11 +29,11 @@ func main() {
 		}
 	})
 
-	router.GET("/:url", func(ctx *gin.Context) {
-		url := ctx.Param("url")
-		if urlData, ok := urlCache[url]; ok {
-			urlData.increaseCount(url)
-			ctx.Redirect(http.StatusMovedPermanently, urlData.LongURL)
+	router.GET("/:id", func(ctx *gin.Context) {
+		shortenID := ctx.Param("id")
+		if urlData, ok := urlCache[shortenID]; ok {
+			urlData.increaseCount(shortenID)
+			ctx.Redirect(http.StatusMovedPermanently, urlData.TargetURL)
 			return
 		}
 
@@ -61,8 +61,8 @@ func main() {
 		shortenID := ctx.Param("id")
 		if urlData, ok := urlCache[shortenID]; ok {
 			ctx.JSON(200, gin.H{
-				"targetURL": urlData.LongURL,
-				"count": urlData.Count,
+				"targetURL": urlData.TargetURL,
+				"count":     urlData.Count,
 			})
 			ctx.Abort()
 			return

@@ -10,8 +10,8 @@ import (
 )
 
 type URLData struct {
-	LongURL string `json:"url"`
-	Count   int    `json:"count"`
+	TargetURL string `json:"url"`
+	Count     int    `json:"count"`
 }
 
 const (
@@ -53,7 +53,7 @@ func updateCacheURLData() (err error) {
 
 	// Update longURLCache
 	for short, long := range urlCache {
-		longURLCache[long.LongURL] = short
+		longURLCache[long.TargetURL] = short
 	}
 
 	return
@@ -92,7 +92,7 @@ SUMMON:
 		goto SUMMON
 	}
 
-	urlCache[shortURL] = URLData{LongURL: longURL, Count: 0}
+	urlCache[shortURL] = URLData{TargetURL: longURL, Count: 0}
 	longURLCache[longURL] = shortURL
 	saveCacheURLData()
 
