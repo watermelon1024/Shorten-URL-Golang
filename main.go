@@ -57,6 +57,20 @@ func main() {
 
 		ctx.JSON(200, gin.H{"shorten": CreateShortULR(data.URL), "url": data.URL})
 	})
+	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
+		shortenID := ctx.Param("id")
+		if urlData, ok := urlCache[shortenID]; ok {
+			ctx.JSON(200, gin.H{
+				"targetURL": urlData.LongURL,
+				"count": urlData.Count,
+			})
+			ctx.Abort()
+			return
+		}
+
+		ctx.JSON(404, gin.H{"error": "not found"})
+		ctx.Abort()
+	})
 
 	gin.ForceConsoleColor()
 	srv := &http.Server{
