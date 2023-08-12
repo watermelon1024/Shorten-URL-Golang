@@ -108,12 +108,9 @@ func isValidURL(addr string) bool {
 	return reURL.MatchString(addr)
 }
 
-func (urlData URLData) increaseCount(shortURL string) (err error) {
-	fileLock.Lock()
-	defer fileLock.Unlock()
-
+func (urlData *URLData) increaseCount(shortURL string) (err error) {
 	urlData.Count++
-	urlCache[shortURL] = urlData
+	urlCache[shortURL] = *urlData
 	err = saveCacheURLData()
 
 	return
