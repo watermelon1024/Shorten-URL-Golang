@@ -33,7 +33,7 @@ func main() {
 		shortenID := ctx.Param("id")
 		if urlData, ok := urlCache[shortenID]; ok {
 			urlData.increaseCount(shortenID)
-			ctx.Redirect(http.StatusMovedPermanently, urlData.TargetURL)
+			ctx.Redirect(http.StatusTemporaryRedirect, urlData.TargetURL)
 			return
 		}
 
