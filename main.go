@@ -33,7 +33,19 @@ func main() {
 		shortenID := ctx.Param("id")
 		if urlData, ok := urlCache[shortenID]; ok {
 			urlData.increaseCount(shortenID)
-			ctx.Redirect(http.StatusTemporaryRedirect, urlData.TargetURL)
+
+			ctx.Header("target", urlData.TargetURL)
+			router.LoadHTMLFiles("views/redirect.html")
+			ctx.HTML(http.StatusTemporaryRedirect, "redirect.html", gin.H{
+				"title":       urlData.Title,
+				"description": urlData.Description,
+				"targetURL":   urlData.TargetURL,
+			})
+
+			// redirectPage, _ := webViews.ReadFile("views/redirect.html")
+			// ctx.Render(http.StatusTemporaryRedirect, HTML{Data: string(redirectPage)})
+
+			// ctx.Redirect(http.StatusTemporaryRedirect, urlData.TargetURL)
 			return
 		}
 

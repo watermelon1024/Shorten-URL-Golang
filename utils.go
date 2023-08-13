@@ -10,8 +10,11 @@ import (
 )
 
 type URLData struct {
-	TargetURL string `json:"url"`
-	Count     int    `json:"count"`
+	TargetURL   string `json:"url"`
+	Count       int    `json:"count"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ImageURL    string `json:"image"`
 }
 
 const (
