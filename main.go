@@ -53,20 +53,20 @@ func main() {
 	apiRouter.POST("/shorten", func(ctx *gin.Context) {
 		data := CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid json"})
+			ctx.JSON(400, gin.H{"error": "Invalid JSON."})
 			ctx.Abort()
 			return
 		}
 
 		if !isValidURL(data.URL) {
-			ctx.JSON(400, gin.H{"error": "invalid url"})
+			ctx.JSON(400, gin.H{"error": "Invalid URL format."})
 			ctx.Abort()
 			return
 		}
 
 		shortURL := CreateShortULR(&data)
 		if len(shortURL) == 0 {
-			ctx.JSON(400, gin.H{"error": "this url is already been used"})
+			ctx.JSON(400, gin.H{"error": "This URL is already been used."})
 			ctx.Abort()
 			return
 		}

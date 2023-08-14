@@ -55,10 +55,16 @@
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.6s, color 0.5s, transform 0.3s;
     }
 
     button:hover {
       background-color: #2980b9;
+    }
+
+    #shortenButton[disabled] {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
 
     .url-box {
@@ -129,6 +135,9 @@
     const copyButton = document.getElementById("copy-button");
 
     shortenButton.addEventListener("click", async () => {
+      shortenButton.disabled = true;
+      shortenButton.textContent = "Shortening...";
+
       fetch('/api/shorten', {
         method: 'POST',
         body: JSON.stringify({
@@ -140,7 +149,7 @@
       })
         .then((d) => d.json())
         .then(({ error, shorten }) => {
-          if (error) alert('Invalid URL Format');
+          if (error) alert(error);
           else {
             const shortenedUrl = `${location.origin}/${encodeURI(shorten)}`;
             shortenedLink.textContent = shortenedUrl;
@@ -149,6 +158,12 @@
             copyButton.style.display = "inline-block";
           }
         });
+
+      shortenButton.textContent = "Shorten Successfully!";
+      setTimeout(() => {
+        shortenButton.disabled = false;
+        shortenButton.textContent = "Shorten the URL!";
+      }, 2000);
     });
 
     copyButton.addEventListener("click", () => {
