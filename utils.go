@@ -80,22 +80,39 @@ func saveCacheURLData() (err error) {
 	return
 }
 
-func CreateShortULR(longURL string) string {
-	if shortURL, ok := longURLCache[longURL]; ok {
-		return shortURL
-	}
-
-SUMMON:
+func SummonShortURL() string {
 	shortURL := ""
 	for i := 0; i < 6; i++ {
 		shortURL += string(SHORT_KEYS[rand.Intn(SHORT_LEN)])
 	}
 
 	if _, ok := urlCache[shortURL]; ok {
-		goto SUMMON
+		return SummonShortURL()
 	}
 
-	urlCache[shortURL] = URLData{TargetURL: longURL, Count: 0}
+	return shortURL
+}
+
+func CreateShortULR(data *CreateData) string {
+	longURL := data.URL
+	if shortURL, ok := longURLCache[longURL]; ok {
+		return shortURL
+	}
+	if _, ok := urlCache[data.CustomURL]; ok {
+		return ""
+	}
+
+	shortURL := data.CustomURL
+	if len(shortURL) == 0 {
+		shortURL = SummonShortURL()
+	}
+
+	urlCache[shortURL] = URLData{
+		TargetURL:   longURL,
+		Count:       0,
+		Title:       data.Title,
+		Description: data.Description,
+	}
 	longURLCache[longURL] = shortURL
 	saveCacheURLData()
 

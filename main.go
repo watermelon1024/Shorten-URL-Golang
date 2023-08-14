@@ -17,7 +17,10 @@ import (
 var webViews embed.FS
 
 type CreateData struct {
-	URL string `json:"url" binding:"required"`
+	URL         string `json:"url" binding:"required"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	CustomURL   string `json:"customUrl"`
 }
 
 func main() {
@@ -61,7 +64,13 @@ func main() {
 			return
 		}
 
-		ctx.JSON(200, gin.H{"shorten": CreateShortULR(data.URL), "url": data.URL})
+		shortURL := CreateShortULR(&data)
+		if len(shortURL) == 0 {
+			ctx.JSON(400, gin.H{"error": "this url is already been used"})
+			ctx.Abort()
+			return
+		}
+		ctx.JSON(200, gin.H{"shorten": shortURL, "url": data.URL})
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := ctx.Param("id")
