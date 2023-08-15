@@ -10,6 +10,7 @@ import (
 )
 
 type URLData struct {
+	ShortURL    string `json:"-"`
 	TargetURL   string `json:"url"`
 	Count       int    `json:"count"`
 	Title       string `json:"title"`
@@ -93,13 +94,18 @@ func SummonShortURL() string {
 	return shortURL
 }
 
-func CreateShortULR(data *CreateData) string {
+func CreateShortURL(data *CreateData) (statusCode int, urlData URLData, err error) {
 	longURL := data.URL
 	if shortURL, ok := longURLCache[longURL]; ok {
-		return shortURL
+		// if long url is in cache
+		urlData := urlCache[shortURL]
+		urlData.ShortURL = shortURL
+		return 200, urlData, nil
 	}
-	if _, ok := urlCache[data.CustomURL]; ok {
-		return ""
+	if urlData, ok := urlCache[data.CustomURL]; ok {
+		// if short url is used
+		urlData.ShortURL = data.CustomURL
+		return 400, urlData, fmt.Errorf("this URL is already been used")
 	}
 
 	shortURL := data.CustomURL
@@ -107,16 +113,18 @@ func CreateShortULR(data *CreateData) string {
 		shortURL = SummonShortURL()
 	}
 
-	urlCache[shortURL] = URLData{
+	URLData := URLData{
+		ShortURL:    shortURL,
 		TargetURL:   longURL,
 		Count:       0,
 		Title:       data.Title,
 		Description: data.Description,
 	}
+	urlCache[shortURL] = URLData
 	longURLCache[longURL] = shortURL
 	saveCacheURLData()
 
-	return shortURL
+	return 201, URLData, nil
 }
 
 func GetURL(shortURL string) (urlData URLData, ok bool) {

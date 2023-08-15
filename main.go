@@ -64,13 +64,13 @@ func main() {
 			return
 		}
 
-		shortURL := CreateShortULR(&data)
-		if len(shortURL) == 0 {
-			ctx.JSON(400, gin.H{"error": "This URL is already been used."})
+		statusCode, shortURL, err := CreateShortURL(&data)
+		if err != nil {
+			ctx.JSON(statusCode, gin.H{"error": err.Error()})
 			ctx.Abort()
 			return
 		}
-		ctx.JSON(200, gin.H{"shorten": shortURL, "url": data.URL})
+		ctx.JSON(200, gin.H{"shorten": shortURL.ShortURL, "url": data.URL})
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := ctx.Param("id")
