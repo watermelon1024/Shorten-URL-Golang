@@ -138,7 +138,7 @@
       shortenButton.disabled = true;
       shortenButton.textContent = "Shortening...";
 
-      fetch('/api/shorten', {
+      await fetch('/api/shorten', {
         method: 'POST',
         body: JSON.stringify({
           url: urlInput.value,
@@ -149,21 +149,24 @@
       })
         .then((d) => d.json())
         .then(({ error, shorten }) => {
-          if (error) alert(error);
+          if (error) {
+            shortenButton.textContent = "Shorten Failed!";
+            alert(error);
+          }
           else {
             const shortenedUrl = `${location.origin}/${encodeURI(shorten)}`;
             shortenedLink.textContent = shortenedUrl;
             shortenedLink.setAttribute("data-url", shortenedUrl);
             shortenedLink.style.display = "inline-block";
             copyButton.style.display = "inline-block";
+            shortenButton.textContent = "Shorten Successfully!";
           }
         });
 
-      shortenButton.textContent = "Shorten Successfully!";
       setTimeout(() => {
         shortenButton.disabled = false;
         shortenButton.textContent = "Shorten the URL!";
-      }, 2000);
+      }, 3000);
     });
 
     copyButton.addEventListener("click", () => {
