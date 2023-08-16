@@ -17,6 +17,8 @@ import (
 var (
 	//go:embed all:views
 	webViews embed.FS
+
+	HOSTNAME string
 )
 
 type CreateData struct {
@@ -28,6 +30,7 @@ type CreateData struct {
 
 func main() {
 	dotenv.Load()
+	HOSTNAME = os.Getenv("HOSTNAME")
 
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {

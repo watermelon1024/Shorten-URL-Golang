@@ -33,7 +33,7 @@ var (
 	longURLCache = map[string]string{}
 	fileLock     sync.Mutex
 	// URL validation regex
-	reURL = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,}/?)([\S]+)?`)
+	reURL = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
 )
 
 func init() {
@@ -133,7 +133,11 @@ func GetURL(shortURL string) (urlData URLData, ok bool) {
 }
 
 func isValidURL(addr string) bool {
-	return reURL.MatchString(addr)
+	match := reURL.FindStringSubmatch(addr)
+	if len(match) == 0 || match[3] == HOSTNAME {
+		return false
+	}
+	return true
 }
 
 func (urlData *URLData) increaseCount(shortURL string) (err error) {
