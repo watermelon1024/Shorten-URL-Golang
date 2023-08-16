@@ -10,11 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/compose-spec/compose-go/dotenv"
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed all:views
-var webViews embed.FS
+var (
+	//go:embed all:views
+	webViews embed.FS
+)
 
 type CreateData struct {
 	URL         string `json:"url" binding:"required"`
@@ -24,6 +27,8 @@ type CreateData struct {
 }
 
 func main() {
+	dotenv.Load()
+
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api") {
