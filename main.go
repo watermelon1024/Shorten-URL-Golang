@@ -46,7 +46,12 @@ func main() {
 			urlData.increaseCount(shortenID)
 
 			router.LoadHTMLFiles("views/redirect.html")
-			ctx.HTML(http.StatusTemporaryRedirect, "redirect.html", gin.H{
+			if len(urlData.Title) == 0 && len(urlData.Description) == 0 {
+				ctx.Redirect(http.StatusTemporaryRedirect, urlData.TargetURL)
+				return
+			}
+
+			ctx.HTML(http.StatusOK, "redirect.html", gin.H{
 				"title":       urlData.Title,
 				"description": urlData.Description,
 				"targetURL":   urlData.TargetURL,
