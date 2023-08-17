@@ -89,8 +89,11 @@ func main() {
 		shortenID := ctx.Param("id")
 		if urlData, ok := urlCache[shortenID]; ok {
 			ctx.JSON(200, gin.H{
-				"targetURL": urlData.TargetURL,
-				"count":     urlData.Count,
+				"targetURL":   urlData.TargetURL,
+				"title":       urlData.Title,
+				"description": urlData.Description,
+				"image":       urlData.ImageURL,
+				"count":       urlData.Count,
 			})
 			ctx.Abort()
 			return
