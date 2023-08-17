@@ -40,12 +40,12 @@ func main() {
 		}
 	})
 
+	router.LoadHTMLFiles("views/redirect.html")
 	router.GET("/:id", func(ctx *gin.Context) {
 		shortenID := ctx.Param("id")
 		if urlData, ok := urlCache[shortenID]; ok {
 			urlData.increaseCount(shortenID)
 
-			router.LoadHTMLFiles("views/redirect.html")
 			if len(urlData.Title) == 0 && len(urlData.Description) == 0 {
 				ctx.Redirect(http.StatusTemporaryRedirect, urlData.TargetURL)
 				return
@@ -66,13 +66,13 @@ func main() {
 	apiRouter.POST("/shorten", func(ctx *gin.Context) {
 		data := CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
-			ctx.JSON(400, gin.H{"error": "Invalid JSON."})
+			ctx.JSON(400, gin.H{"error": "invalid JSON."})
 			ctx.Abort()
 			return
 		}
 
 		if !isValidURL(data.URL) {
-			ctx.JSON(400, gin.H{"error": "Invalid URL format."})
+			ctx.JSON(400, gin.H{"error": "invalid URL format."})
 			ctx.Abort()
 			return
 		}
@@ -83,7 +83,7 @@ func main() {
 			ctx.Abort()
 			return
 		}
-		ctx.JSON(200, gin.H{"shorten": shortURL.ShortURL, "url": data.URL})
+		ctx.JSON(statusCode, gin.H{"shorten": shortURL.ShortURL, "url": data.URL})
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := ctx.Param("id")
