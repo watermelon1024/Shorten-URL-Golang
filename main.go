@@ -19,6 +19,7 @@ var (
 	webViews embed.FS
 
 	HOSTNAME string
+	GIN_MODE string
 )
 
 type CreateData struct {
@@ -31,6 +32,8 @@ type CreateData struct {
 func main() {
 	dotenv.Load()
 	HOSTNAME = os.Getenv("HOSTNAME")
+	GIN_MODE = os.Getenv("GIN_MODE")
+	gin.SetMode(GIN_MODE)
 
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
