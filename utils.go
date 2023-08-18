@@ -94,37 +94,26 @@ func SummonShortURL() string {
 	return shortURL
 }
 
-func CreateShortURL(data *CreateData) (statusCode int, urlData URLData, err error) {
+func CreateShortURL(data *CreateData) URLData {
 	longURL := data.URL
-	if shortURL, ok := longURLCache[longURL]; ok {
-		// if long url is in cache
-		urlData := urlCache[shortURL]
-		urlData.ShortURL = shortURL
-		return 200, urlData, nil
-	}
-	if urlData, ok := urlCache[data.CustomURL]; ok {
-		// if short url is used
-		urlData.ShortURL = data.CustomURL
-		return 400, urlData, fmt.Errorf("this URL is already been used")
-	}
-
 	shortURL := data.CustomURL
 	if len(shortURL) == 0 {
 		shortURL = SummonShortURL()
 	}
 
-	URLData := URLData{
+	urlData := URLData{
 		ShortURL:    shortURL,
 		TargetURL:   longURL,
 		Count:       0,
 		Title:       data.Title,
 		Description: data.Description,
+		// ImageURL:    data.ImageURL,
 	}
-	urlCache[shortURL] = URLData
+	urlCache[shortURL] = urlData
 	longURLCache[longURL] = shortURL
 	saveCacheURLData()
 
-	return 201, URLData, nil
+	return urlData
 }
 
 func GetURL(shortURL string) (urlData URLData, ok bool) {
@@ -132,12 +121,15 @@ func GetURL(shortURL string) (urlData URLData, ok bool) {
 	return
 }
 
-func isValidURL(addr string) bool {
+func isValidURL(addr string) (bool, string) {
 	match := reURL.FindStringSubmatch(addr)
-	if len(match) == 0 || match[3] == HOSTNAME {
-		return false
+	if len(match) == 0 {
+		return false, "invalid URL format"
 	}
-	return true
+	if match[3] == HOSTNAME {
+		return false, "illegal URL"
+	}
+	return true, ""
 }
 
 func (urlData *URLData) increaseCount(shortURL string) (err error) {

@@ -66,24 +66,31 @@ func main() {
 	apiRouter.POST("/shorten", func(ctx *gin.Context) {
 		data := CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid JSON."})
+			ctx.JSON(400, gin.H{"error": "invalid JSON"})
+			ctx.Abort()
+			return
+		}
+		// check whether url format is valid
+		if valid, errMessage := isValidURL(data.URL); !valid {
+			ctx.JSON(400, gin.H{"error": errMessage})
+			ctx.Abort()
+			return
+		}
+		// check whether longURL is in cache
+		if shortURL, ok := longURLCache[data.URL]; ok {
+			ctx.JSON(200, gin.H{"shorten": shortURL, "url": data.URL})
+			ctx.Abort()
+			return
+		}
+		// check whether shortURL is used
+		if _, ok := urlCache[data.CustomURL]; ok {
+			ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			ctx.Abort()
 			return
 		}
 
-		if !isValidURL(data.URL) {
-			ctx.JSON(400, gin.H{"error": "invalid URL format."})
-			ctx.Abort()
-			return
-		}
-
-		statusCode, shortURL, err := CreateShortURL(&data)
-		if err != nil {
-			ctx.JSON(statusCode, gin.H{"error": err.Error()})
-			ctx.Abort()
-			return
-		}
-		ctx.JSON(statusCode, gin.H{"shorten": shortURL.ShortURL, "url": data.URL})
+		urlData := CreateShortURL(&data)
+		ctx.JSON(201, gin.H{"shorten": urlData.ShortURL, "url": data.URL})
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := ctx.Param("id")
