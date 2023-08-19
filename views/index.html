@@ -1,191 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="title" content="URL Shortener" />
+    <meta name="description" content="A simple and practical URL shortener." />
+    <meta property="og:title" content="URL Shortener" />
+    <meta
+      property="og:description"
+      content="A simple and practical URL shortener."
+    />
+    <title>URL Shortener</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #1a1a1a;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="title" content="URL Shortener" />
-  <meta name="description" content="A simple and practical URL shortener." />
-  <meta property="og:title" content="URL Shortener" />
-  <meta property="og:description" content="A simple and practical URL shortener." />
-  <title>URL Shortener</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #1a1a1a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+      .container {
+        text-align: center;
+        width: 50%;
+        padding: 25px;
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.7);
+        box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+      }
 
-    .container {
-      text-align: center;
-      width: 50%;
-      padding: 25px;
-      border-radius: 10px;
-      background-color: rgba(0, 0, 0, 0.7);
-      box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
-    }
+      h1 {
+        font-size: 26px;
+        margin-top: 5px;
+        margin-bottom: 16px;
+      }
 
-    h1 {
-      font-size: 26px;
-      margin-top: 5px;
-      margin-bottom: 16px;
-    }
+      input[type='text'] {
+        width: 95%;
+        padding: 10px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
 
-    input[type="text"] {
-      width: 95%;
-      padding: 10px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
+      button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.6s, color 0.5s, transform 0.3s;
+      }
 
+      button:hover {
+        background-color: #2980b9;
+      }
 
-    button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.6s, color 0.5s, transform 0.3s;
-    }
+      #shortenButton[disabled] {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
 
-    button:hover {
-      background-color: #2980b9;
-    }
+      .url-box {
+        width: 85%;
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-inline: auto;
+        margin-top: 18px;
+        padding: 5px 7px;
+        background-color: white;
+        color: black;
+        justify-content: space-between;
+      }
 
-    #shortenButton[disabled] {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
+      #shortened-link {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 
-    .url-box {
-      width: 85%;
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin-inline: auto;
-      margin-top: 18px;
-      padding: 5px;
-      background-color: white;
-      color: black;
-    }
+      #copy-button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-left: 1px;
+        padding: 5px 10px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.6s, color 0.5s, transform 0.3s;
+      }
 
-    #shortened-link {
-      flex-grow: 1;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
+      #copy-button:hover {
+        background-color: #45a049;
+      }
 
-    #copy-button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 5px 10px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.6s, color 0.5s, transform 0.3s;
-    }
+      #copy-button.copied {
+        background-color: #58ca5d;
+        color: white;
+        padding: 5px 2.3px;
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
 
-    #copy-button:hover {
-      background-color: #45a049;
-    }
-
-    #copy-button.copied {
-      background-color: #58ca5d;
-      color: white;
-      padding: 5px 2.3px;
-      transform: scale(1.05);
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <h1>URL Shortener</h1>
-    <input type="text" id="urlInput" placeholder="Original URL">
-    <input type="text" id="titleInput" placeholder="Custom Title (Optional)">
-    <input type="text" id="descriptionInput" placeholder="Custom Description (Optional)">
-    <input type="text" id="customUrlInput" placeholder="Custom URL (Optional)">
-    <button id="shortenButton">Shorten the URL!</button>
-    <div class="url-box" id="shortened-url">
-      <span id="shortened-link"></span>
-      <button id="copy-button">Copy</button>
+  <body>
+    <div class="container">
+      <h1>URL Shortener</h1>
+      <input
+        type="text"
+        id="urlInput"
+        placeholder="Original URL"
+        autocomplete="off"
+      />
+      <input
+        type="text"
+        id="titleInput"
+        placeholder="Custom Title (Optional)"
+        autocomplete="off"
+      />
+      <input
+        type="text"
+        id="descriptionInput"
+        placeholder="Custom Description (Optional)"
+        autocomplete="off"
+      />
+      <input
+        type="text"
+        id="customUrlInput"
+        placeholder="Custom URL (Optional)"
+        autocomplete="off"
+      />
+      <button id="shortenButton">Shorten the URL!</button>
+      <div class="url-box" id="shortened-url">
+        <span id="shortened-link"></span>
+        <button id="copy-button">Copy</button>
+      </div>
     </div>
-  </div>
 
-  <script>
-    const shortenButton = document.getElementById("shortenButton");
-    const urlInput = document.getElementById("urlInput");
-    const titleInput = document.getElementById("titleInput");
-    const descriptionInput = document.getElementById("descriptionInput");
-    const customUrlInput = document.getElementById("customUrlInput");
-    const shortenedLink = document.getElementById("shortened-link");
-    const copyButton = document.getElementById("copy-button");
+    <script>
+      const shortenButton = document.getElementById('shortenButton');
+      const urlInput = document.getElementById('urlInput');
+      const titleInput = document.getElementById('titleInput');
+      const descriptionInput = document.getElementById('descriptionInput');
+      const customUrlInput = document.getElementById('customUrlInput');
+      const shortenedLink = document.getElementById('shortened-link');
+      const copyButton = document.getElementById('copy-button');
 
-    shortenButton.addEventListener("click", async () => {
-      shortenButton.disabled = true;
-      shortenButton.textContent = "Shortening...";
+      shortenButton.addEventListener('click', async () => {
+        shortenButton.disabled = true;
+        shortenButton.textContent = 'Shortening...';
 
-      await fetch('/api/shorten', {
-        method: 'POST',
-        body: JSON.stringify({
-          url: urlInput.value,
-          title: titleInput.value,
-          description: descriptionInput.value,
-          customUrl: customUrlInput.value
-        }),
-      })
-        .then((d) => d.json())
-        .then(({ error, shorten }) => {
-          if (error) {
-            shortenButton.textContent = "Shorten Failed!";
-            alert(error);
-          }
-          else {
-            const shortenedUrl = `${location.origin}/${encodeURI(shorten)}`;
-            shortenedLink.textContent = shortenedUrl;
-            shortenedLink.setAttribute("data-url", shortenedUrl);
-            shortenedLink.style.display = "inline-block";
-            copyButton.style.display = "inline-block";
-            shortenButton.textContent = "Shorten Successfully!";
-          }
-        });
+        await fetch('/api/shorten', {
+          method: 'POST',
+          body: JSON.stringify({
+            url: urlInput.value,
+            title: titleInput.value,
+            description: descriptionInput.value,
+            customUrl: customUrlInput.value,
+          }),
+        })
+          .then((d) => d.json())
+          .then((d) => {
+            console.log(d);
+            return d;
+          })
+          .then(({ error, short, title, description }) => {
+            if (error) {
+              shortenButton.textContent = 'Shorten Failed!';
+              alert(error);
+            } else {
+              const shortenedUrl = `${location.origin}/${encodeURI(short)}`;
+              shortenedLink.textContent = shortenedUrl;
+              shortenedLink.setAttribute('data-url', shortenedUrl);
+              shortenedLink.style.display = 'inline-block';
+              copyButton.style.display = 'inline-block';
+              shortenButton.textContent = 'Shorten Successfully!';
 
-      setTimeout(() => {
-        shortenButton.disabled = false;
-        shortenButton.textContent = "Shorten the URL!";
-      }, 3000);
-    });
+              titleInput.value = title;
+              descriptionInput.value = description;
+            }
+          });
 
-    copyButton.addEventListener("click", () => {
-      const shortenedUrl = shortenedLink.getAttribute("data-url");
-      const tempInput = document.createElement("input");
-      tempInput.value = shortenedUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand("copy");
-      document.body.removeChild(tempInput);
+        setTimeout(() => {
+          shortenButton.disabled = false;
+          shortenButton.textContent = 'Shorten the URL!';
+        }, 3000);
+      });
 
-      copyButton.classList.add("copied");
-      copyButton.textContent = "Copied!";
-      setTimeout(() => {
-        copyButton.classList.remove("copied");
-        copyButton.textContent = "Copy";
-      }, 2000);
-    });
-  </script>
-</body>
+      copyButton.addEventListener('click', () => {
+        const shortenedUrl = shortenedLink.dataset.url;
+        const tmpInput = document.createElement('input');
+        tmpInput.value = shortenedUrl;
+        document.body.appendChild(tmpInput);
+        tmpInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmpInput);
 
+        copyButton.classList.add('copied');
+        copyButton.textContent = 'Copied!';
+        setTimeout(() => {
+          copyButton.classList.remove('copied');
+          copyButton.textContent = 'Copy';
+        }, 2000);
+      });
+    </script>
+  </body>
 </html>
