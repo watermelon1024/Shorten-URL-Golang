@@ -197,7 +197,7 @@
       });
 
       copyButton.addEventListener('click', () => {
-        const shortenedUrl = shortenedLink.dataset['data-url'];
+        const shortenedUrl = shortenedLink.dataset.url;
         const tmpInput = document.createElement('input');
         tmpInput.value = shortenedUrl;
         document.body.appendChild(tmpInput);
