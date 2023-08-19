@@ -73,6 +73,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           file: ./Dockerfile
           platforms: linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
+          build-args: GIT_COMMIT=$(git rev-list --all -1)
 
       - name: Move cache
         run: |

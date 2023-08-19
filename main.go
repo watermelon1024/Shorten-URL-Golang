@@ -17,6 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var GIT_COMMIT string
+
 //go:embed all:views
 var webViews embed.FS
 
@@ -26,6 +28,13 @@ func init() {
 }
 
 func main() {
+	log.Print("Git Commit: ")
+	if GIT_COMMIT == "" {
+		log.Println("empty")
+	} else {
+		log.Println(GIT_COMMIT)
+	}
+
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api") {
