@@ -1,10 +1,9 @@
 FROM golang:alpine as builder
 
 WORKDIR /app
-COPY go.* ./
+COPY go.mod go.sum ./
 RUN go mod download
-COPY *.go ./
-COPY views ./views
+COPY . .
 RUN go build -a -ldflags '-s -w' -gcflags="all=-trimpath=${PWD}" -asmflags="all=-trimpath=${PWD}" -o start
 
 FROM alpine
