@@ -28,12 +28,7 @@ func init() {
 }
 
 func main() {
-	log.Print("Git Commit: ")
-	if GIT_COMMIT == "" {
-		log.Println("empty")
-	} else {
-		log.Println(GIT_COMMIT)
-	}
+	log.Println("Git Commit:", GIT_COMMIT)
 
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
