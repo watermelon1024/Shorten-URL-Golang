@@ -190,13 +190,13 @@
       });
 
       copyButton.addEventListener('click', () => {
-        const shortenedUrl = shortenedLink.getAttribute('data-url');
-        const tempInput = document.createElement('input');
-        tempInput.value = shortenedUrl;
-        document.body.appendChild(tempInput);
-        tempInput.select();
+        const shortenedUrl = shortenedLink.dataset['data-url'];
+        const tmpInput = document.createElement('input');
+        tmpInput.value = shortenedUrl;
+        document.body.appendChild(tmpInput);
+        tmpInput.select();
         document.execCommand('copy');
-        document.body.removeChild(tempInput);
+        document.body.removeChild(tmpInput);
 
         copyButton.classList.add('copied');
         copyButton.textContent = 'Copied!';
