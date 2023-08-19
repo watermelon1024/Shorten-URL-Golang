@@ -6,8 +6,8 @@ RUN go mod download
 COPY . .
 ARG GIT_COMMIT=empty
 RUN go build -a -ldflags "-X main.GIT_COMMIT=$GIT_COMMIT -s -w" \
-  -gcflags="all=-trimpath=$PWD" \
-  -asmflags="all=-trimpath=$PWD" \
+  -gcflags="all=-trimpath=${PWD}" \
+  -asmflags="all=-trimpath=${PWD}" \
   -o start
 
 FROM alpine
