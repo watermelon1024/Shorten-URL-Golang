@@ -33,8 +33,8 @@ var (
 	longURLCache = map[LongURL]ShortURL{}
 	fileLock     sync.Mutex
 	// URL validation regex
-	reURL = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
-	reCustomURL = regexp.MustCompile(`^[a-zA-Z0-9]{1,32}`)
+	reURL       = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
+	reCustomURL = regexp.MustCompile(`^([a-zA-Z0-9]{1,32})$`)
 )
 
 func init() {

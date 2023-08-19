@@ -78,10 +78,10 @@ func main() {
 					return
 				}
 			}
-		// check whether shortURL format is valid
+			// check whether shortURL format is valid
 		} else if data.CustomURL.IsValid() {
 			ctx.JSON(400, gin.H{"error": "invalid custom url format"})
-		// check whether shortURL is used
+			// check whether shortURL is used
 		} else if old, ok := data.CustomURL.GetData(); ok {
 			if data.URL != old.TargetURL {
 				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
@@ -93,7 +93,7 @@ func main() {
 
 		data.InsertMeta()
 
-		ctx.JSON(200, data.CreateShortURL())
+		ctx.JSON(201, data.CreateShortURL())
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(ctx.Param("id"))
