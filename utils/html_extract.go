@@ -8,6 +8,8 @@ import (
 	"golang.org/x/net/html"
 )
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+
 type HTMLMeta struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -64,7 +66,12 @@ func ExtractHtmlMetaFromString(htmlString string) HTMLMeta {
 }
 
 func ExtractHtmlMetaFromURL(url string) (HTMLMeta, error) {
-	res, err := http.Get(url)
+	client := http.Client{}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return HTMLMeta{}, err
+	}
+	res, err := client.Do(req)
 	if err != nil {
 		return HTMLMeta{}, err
 	}
