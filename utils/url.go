@@ -33,7 +33,8 @@ var (
 	longURLCache = map[LongURL]ShortURL{}
 	fileLock     sync.Mutex
 	// URL validation regex
-	reURL = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
+	reURL       = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
+	reCustomURL = regexp.MustCompile(`^([a-zA-Z0-9]{1,32})$`)
 )
 
 func init() {
@@ -80,7 +81,7 @@ func summonShortURL() ShortURL {
 func (data CreateData) CreateShortURL() URLData {
 	longURL := data.URL
 	shortURL := data.CustomURL
-	if len(shortURL) == 0 {
+	if shortURL == "" {
 		shortURL = summonShortURL()
 	}
 
@@ -122,6 +123,10 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 	return
 }
 
+func (shortURL ShortURL) IsValid() bool {
+	return reCustomURL.MatchString(string(shortURL))
+}
+
 func (longURL LongURL) GetShortURL() (shortURL ShortURL, ok bool) {
 	shortURL, ok = longURLCache[longURL]
 	return
@@ -139,10 +144,10 @@ func (longURL LongURL) GetData() (URLData, bool) {
 func IsValidURL(addr string) (bool, error) {
 	match := reURL.FindStringSubmatch(addr)
 	if len(match) == 0 {
-		return false, errors.New("invalid URL format")
+		return false, errors.New("invalid url format")
 	}
-	if match[3] == HOSTNAME {
-		return false, errors.New("illegal URL")
+	if (match[2] + match[3]) == HOSTNAME {
+		return false, errors.New("illegal url, you can not redirect to " + HOSTNAME)
 	}
 	return true, nil
 }
