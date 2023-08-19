@@ -8,10 +8,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"shorten-url/utils"
 	"strings"
 	"time"
-
-	"shorten-url/utils"
 
 	"github.com/compose-spec/compose-go/dotenv"
 	"github.com/gin-gonic/gin"
