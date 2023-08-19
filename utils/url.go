@@ -106,7 +106,6 @@ func (d *CreateData) InsertMeta() error {
 			log.Println("get meta error:", err)
 			return err
 		}
-		fmt.Println(data)
 		if d.Title == "" {
 			d.Title = data.Title
 		}
