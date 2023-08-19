@@ -10,31 +10,21 @@ import (
 	"strings"
 	"time"
 
+	"shorten-url/utils"
+
 	"github.com/compose-spec/compose-go/dotenv"
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	//go:embed all:views
-	webViews embed.FS
+//go:embed all:views
+var webViews embed.FS
 
-	HOSTNAME string
-	GIN_MODE string
-)
-
-type CreateData struct {
-	URL         string `json:"url" binding:"required"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	CustomURL   string `json:"customUrl"`
+func init() {
+	dotenv.Load()
+	gin.SetMode(strings.ToLower(os.Getenv("GIN_MODE")))
 }
 
 func main() {
-	dotenv.Load()
-	HOSTNAME = os.Getenv("HOSTNAME")
-	GIN_MODE = os.Getenv("GIN_MODE")
-	gin.SetMode(GIN_MODE)
-
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api") {
@@ -45,12 +35,12 @@ func main() {
 
 	router.LoadHTMLFiles("views/redirect.html")
 	router.GET("/:id", func(ctx *gin.Context) {
-		shortenID := ctx.Param("id")
-		if urlData, ok := urlCache[shortenID]; ok {
-			urlData.increaseCount(shortenID)
+		shortenID := utils.ShortURL(ctx.Param("id"))
+		if urlData, ok := shortenID.GetData(); ok {
+			urlData.IncreaseCount()
 
 			if len(urlData.Title) == 0 && len(urlData.Description) == 0 {
-				ctx.Redirect(http.StatusTemporaryRedirect, urlData.TargetURL)
+				ctx.Redirect(http.StatusTemporaryRedirect, string(urlData.TargetURL))
 				return
 			}
 
@@ -67,37 +57,37 @@ func main() {
 
 	apiRouter := router.Group("/api")
 	apiRouter.POST("/shorten", func(ctx *gin.Context) {
-		data := CreateData{}
+		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
 			ctx.JSON(400, gin.H{"error": "invalid JSON"})
 			ctx.Abort()
 			return
 		}
 		// check whether url format is valid
-		if valid, errMessage := isValidURL(data.URL); !valid {
+		if valid, errMessage := utils.IsValidURL(string(data.URL)); !valid {
 			ctx.JSON(400, gin.H{"error": errMessage})
 			ctx.Abort()
 			return
 		}
 		// check whether longURL is in cache
-		if shortURL, ok := longURLCache[data.URL]; ok {
-			ctx.JSON(200, gin.H{"shorten": shortURL, "url": data.URL})
+		if shortURL, ok := data.URL.GetData(); ok {
+			ctx.JSON(200, gin.H{"shorten": shortURL.ShortURL, "url": data.URL})
 			ctx.Abort()
 			return
 		}
 		// check whether shortURL is used
-		if _, ok := urlCache[data.CustomURL]; ok {
+		if _, ok := data.CustomURL.GetData(); ok {
 			ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			ctx.Abort()
 			return
 		}
 
-		urlData := CreateShortURL(&data)
+		urlData := data.CreateShortURL()
 		ctx.JSON(201, gin.H{"shorten": urlData.ShortURL, "url": data.URL})
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
-		shortenID := ctx.Param("id")
-		if urlData, ok := urlCache[shortenID]; ok {
+		shortenID := utils.ShortURL(ctx.Param("id"))
+		if urlData, ok := shortenID.GetData(); ok {
 			ctx.JSON(200, gin.H{
 				"targetURL":   urlData.TargetURL,
 				"title":       urlData.Title,
@@ -119,8 +109,13 @@ func main() {
 		Handler: router,
 	}
 
+	if gin.Mode() != gin.ReleaseMode {
+		srv.Addr = "127.0.0.1:8080"
+	}
+
 	go func() {
 		log.Println("Server starting...")
+		log.Println("listen", srv.Addr)
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
