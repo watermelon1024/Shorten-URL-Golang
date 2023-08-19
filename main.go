@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -33,7 +34,8 @@ func main() {
 		}
 	})
 
-	router.LoadHTMLFiles("views/redirect.html")
+	router.SetHTMLTemplate(template.Must(template.New("").ParseFS(webViews, "views/redirect.html")))
+
 	router.GET("/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(ctx.Param("id"))
 		if urlData, ok := shortenID.GetData(); ok {
