@@ -59,11 +59,11 @@ func ExtractHtmlMeta(resp io.Reader) (data HTMLMeta) {
 	}
 }
 
-func ExtractHtmlMetaString(htmlString string) HTMLMeta {
+func ExtractHtmlMetaFromString(htmlString string) HTMLMeta {
 	return ExtractHtmlMeta(strings.NewReader(htmlString))
 }
 
-func ExtractHtmlMetaURL(url string) (HTMLMeta, error) {
+func ExtractHtmlMetaFromURL(url string) (HTMLMeta, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return HTMLMeta{}, err

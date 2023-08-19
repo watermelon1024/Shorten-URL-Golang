@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"regexp"
@@ -41,7 +42,7 @@ func init() {
 }
 
 type URLData struct {
-	ShortURL    ShortURL `json:"-"`
+	ShortURL    ShortURL `json:"short"`
 	TargetURL   LongURL  `json:"url"`
 	Count       int      `json:"count"`
 	Title       string   `json:"title"`
@@ -96,6 +97,25 @@ func (data CreateData) CreateShortURL() URLData {
 	saveCacheURLData()
 
 	return urlData
+}
+
+func (d *CreateData) InsertMeta() error {
+	if d.Title == "" || d.Description == "" {
+		data, err := ExtractHtmlMetaFromURL(string(d.URL))
+		if err != nil {
+			log.Println("get meta error:", err)
+			return err
+		}
+		fmt.Println(data)
+		if d.Title == "" {
+			d.Title = data.Title
+		}
+		if d.Description == "" {
+			d.Description = data.Description
+		}
+	}
+
+	return nil
 }
 
 func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {

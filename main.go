@@ -60,30 +60,30 @@ func main() {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
 			ctx.JSON(400, gin.H{"error": "invalid JSON"})
-			ctx.Abort()
 			return
 		}
 		// check whether url format is valid
 		if valid, errMessage := utils.IsValidURL(string(data.URL)); !valid {
 			ctx.JSON(400, gin.H{"error": errMessage})
-			ctx.Abort()
 			return
 		}
 		// check whether longURL is in cache
 		if shortURL, ok := data.URL.GetData(); ok {
-			ctx.JSON(200, gin.H{"shorten": shortURL.ShortURL, "url": data.URL})
-			ctx.Abort()
-			return
+			// check whether meta data is same
+			if shortURL.Title == data.Title || shortURL.Description == data.Description {
+				ctx.JSON(200, shortURL)
+				return
+			}
 		}
 		// check whether shortURL is used
 		if _, ok := data.CustomURL.GetData(); ok {
 			ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
-			ctx.Abort()
 			return
 		}
 
-		urlData := data.CreateShortURL()
-		ctx.JSON(201, gin.H{"shorten": urlData.ShortURL, "url": data.URL})
+		data.InsertMeta()
+
+		ctx.JSON(200, data.CreateShortURL())
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(ctx.Param("id"))
@@ -95,12 +95,10 @@ func main() {
 				"image":       urlData.ImageURL,
 				"count":       urlData.Count,
 			})
-			ctx.Abort()
 			return
 		}
 
 		ctx.JSON(404, gin.H{"error": "not found"})
-		ctx.Abort()
 	})
 
 	gin.ForceConsoleColor()
