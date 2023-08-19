@@ -1,4 +1,4 @@
-module shorten-url
+module github.com/watermelon1024/Shorten-URL-Golang
 
 go 1.20
 

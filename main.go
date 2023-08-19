@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"shorten-url/utils"
 	"strings"
 	"time"
+
+	"github.com/watermelon1024/Shorten-URL-Golang/utils"
 
 	"github.com/compose-spec/compose-go/dotenv"
 	"github.com/gin-gonic/gin"
