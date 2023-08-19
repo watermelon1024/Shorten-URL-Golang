@@ -71,16 +71,20 @@ func main() {
 		}
 		if data.CustomURL == "" {
 			// check whether longURL is in cache
-			if shortURL, ok := data.URL.GetData(); ok {
+			if old, ok := data.URL.GetData(); ok {
 				// check whether meta data is same
-				if shortURL.Title == data.Title || shortURL.Description == data.Description {
-					ctx.JSON(200, shortURL)
+				if old.Title == data.Title || old.Description == data.Description {
+					ctx.JSON(200, old)
 					return
 				}
 			}
 			// check whether shortURL is used
-		} else if _, ok := data.CustomURL.GetData(); ok {
-			ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
+		} else if old, ok := data.CustomURL.GetData(); ok {
+			if data.URL != old.TargetURL {
+				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
+			} else {
+				ctx.JSON(200, old)
+			}
 			return
 		}
 
