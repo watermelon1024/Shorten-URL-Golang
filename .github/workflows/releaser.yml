@@ -63,6 +63,12 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: ${{ runner.os }}-buildx-
 
+      - name: Get Git Commit Hash
+        id: git-commit
+        run: |
+          GIT_COMMIT=$(git rev-list --all -1)
+          echo "GIT_COMMIT=$GIT_COMMIT" >> $GITHUB_ENV
+
       - uses: docker/build-push-action@v4
         with:
           context: .
@@ -73,7 +79,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           file: ./Dockerfile
           platforms: linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
-          build-args: GIT_COMMIT=$(git rev-list --all -1)
+          build-args: GIT_COMMIT=${{ steps.get-commit.outputs.GIT_COMMIT }}
 
       - name: Move cache
         run: |
