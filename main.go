@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/watermelon1024/Shorten-URL-Golang/utils"
+	"shorten-url/utils"
 
 	"github.com/compose-spec/compose-go/dotenv"
 	"github.com/gin-gonic/gin"

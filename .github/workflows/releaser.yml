@@ -1,15 +1,14 @@
 name: releaser
 on:
-  {}
-  # workflow_dispatch:
-  # push:
-  #   branches: [main]
-  #   paths-ignore:
-  #     - README.md
-  #     - .github/**
-  #     - '!.github/workflows/**'
-  # release:
-  #   types: [created]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - .github/**
+      - '!.github/workflows/**'
+  release:
+    types: [created]
 
 env:
   # Use docker.io for Docker Hub if empty
