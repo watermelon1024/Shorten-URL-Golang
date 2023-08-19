@@ -81,7 +81,7 @@ func summonShortURL() ShortURL {
 func (data CreateData) CreateShortURL() URLData {
 	longURL := data.URL
 	shortURL := data.CustomURL
-	if len(shortURL) == 0 {
+	if shortURL == "" {
 		shortURL = summonShortURL()
 	}
 
@@ -146,7 +146,7 @@ func IsValidURL(addr string) (bool, error) {
 	if len(match) == 0 {
 		return false, errors.New("invalid url format")
 	}
-	if match[3] == HOSTNAME {
+	if (match[2] + match[3]) == HOSTNAME {
 		return false, errors.New("illegal url, you can not redirect to " + HOSTNAME)
 	}
 	return true, nil

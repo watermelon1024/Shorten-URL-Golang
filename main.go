@@ -81,6 +81,7 @@ func main() {
 			// check whether shortURL format is valid
 		} else if data.CustomURL.IsValid() {
 			ctx.JSON(400, gin.H{"error": "invalid custom url format"})
+			return
 			// check whether shortURL is used
 		} else if old, ok := data.CustomURL.GetData(); ok {
 			if data.URL != old.TargetURL {
