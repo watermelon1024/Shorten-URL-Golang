@@ -69,16 +69,17 @@ func main() {
 			ctx.JSON(400, gin.H{"error": errMessage})
 			return
 		}
-		// check whether longURL is in cache
-		if shortURL, ok := data.URL.GetData(); ok {
-			// check whether meta data is same
-			if shortURL.Title == data.Title || shortURL.Description == data.Description {
-				ctx.JSON(200, shortURL)
-				return
+		if data.CustomURL == "" {
+			// check whether longURL is in cache
+			if shortURL, ok := data.URL.GetData(); ok {
+				// check whether meta data is same
+				if shortURL.Title == data.Title || shortURL.Description == data.Description {
+					ctx.JSON(200, shortURL)
+					return
+				}
 			}
-		}
-		// check whether shortURL is used
-		if _, ok := data.CustomURL.GetData(); ok {
+			// check whether shortURL is used
+		} else if _, ok := data.CustomURL.GetData(); ok {
 			ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			return
 		}
