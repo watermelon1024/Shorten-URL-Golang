@@ -15,7 +15,6 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-  ID: ${{ github.head_ref }}.${{ github.sha }}
 
 jobs:
   build:
@@ -51,7 +50,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          labels: git_commit=${{ env.ID }}
+          labels: git_commit=${{ github.sha }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,enable=true,priority=600,prefix=,suffix=,event=branch
@@ -76,7 +75,7 @@ jobs:
           file: ./Dockerfile
           # linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
           platforms: linux/amd64
-          build-args: GIT_COMMIT=${{ env.ID }}
+          build-args: GIT_COMMIT=${{ github.sha }}
 
       - name: Move cache
         run: |
