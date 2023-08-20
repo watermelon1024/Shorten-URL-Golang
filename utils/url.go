@@ -153,13 +153,13 @@ func (longURL LongURL) GetData() (URLData, bool) {
 	return shortUrl.GetData()
 }
 
-func IsValidURL(addr string) error {
-	match := reURL.FindStringSubmatch(addr)
+func (longURL LongURL) IsValid() error {
+	match := reURL.FindStringSubmatch(string(longURL))
 	if len(match) == 0 {
 		return errors.New("invalid url format")
 	}
 	if (match[2] + match[3]) == HOSTNAME {
-		return errors.New("illegal url, you can not redirect to " + HOSTNAME)
+		return errors.New("illegal url, you cannot redirect to " + HOSTNAME)
 	}
 	return nil
 }
