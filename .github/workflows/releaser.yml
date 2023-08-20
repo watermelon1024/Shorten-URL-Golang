@@ -45,14 +45,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get Git Commit Hash
-        id: git-commit
-        run: |
-          GIT_COMMIT=$(git rev-list --all -1)
-          echo $GIT_COMMIT
-          echo ${{ github.head_ref }}.${{ github.sha }}
-          echo "GIT_COMMIT=$GIT_COMMIT" >> $GITHUB_OUTPUT
-
       # https://github.com/docker/metadata-action
       - name: Extract metadata (tags, labels) for Docker
         id: meta
