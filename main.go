@@ -65,7 +65,7 @@ func main() {
 	apiRouter.POST("/shorten", func(ctx *gin.Context) {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid JSON"})
+			ctx.JSON(400, gin.H{"error": "invalid JSON(Original URL is required)"})
 			return
 		}
 		data.URL = utils.LongURL(strings.TrimSpace(string(data.URL)))
@@ -86,7 +86,7 @@ func main() {
 			}
 			// check whether shortURL format is valid
 		} else if data.CustomURL.IsValid() {
-			ctx.JSON(400, gin.H{"error": "invalid custom url format"})
+			ctx.JSON(400, gin.H{"error": "invalid custom url format(too long or illegal chars)"})
 			return
 			// check whether shortURL is used
 		} else if old, ok := data.CustomURL.GetData(); ok {
