@@ -79,7 +79,7 @@ func main() {
 			// check whether longURL is in cache
 			if old, ok := data.URL.GetData(); ok {
 				// check whether meta data is same
-				if old.Title == data.Title || old.Description == data.Description {
+				if old.Title == data.Title && old.Description == data.Description {
 					ctx.JSON(200, old)
 					return
 				}

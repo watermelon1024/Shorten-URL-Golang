@@ -172,6 +172,7 @@
         .then(({ error, short, title, description }) => {
           if (error) {
             shortenButton.textContent = 'Shorten Failed!';
+            shortenedLink.textContent = ''
             alert(error);
           } else {
             const shortenedUrl = `${location.origin}/${encodeURI(short)}`;
