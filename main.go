@@ -71,8 +71,8 @@ func main() {
 		data.URL = utils.LongURL(strings.TrimSpace(string(data.URL)))
 		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		// check whether url format is valid
-		if valid, errMessage := utils.IsValidURL(string(data.URL)); !valid {
-			ctx.JSON(400, gin.H{"error": errMessage})
+		if valid, detail := utils.IsValidURL(string(data.URL)); !valid {
+			ctx.JSON(400, gin.H{"error": detail})
 			return
 		}
 		if data.CustomURL == "" {

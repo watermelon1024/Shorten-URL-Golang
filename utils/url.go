@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -141,15 +140,15 @@ func (longURL LongURL) GetData() (URLData, bool) {
 	return shortUrl.GetData()
 }
 
-func IsValidURL(addr string) (bool, error) {
+func IsValidURL(addr string) (bool, string) {
 	match := reURL.FindStringSubmatch(addr)
 	if len(match) == 0 {
-		return false, errors.New("invalid url format")
+		return false, "invalid url format"
 	}
 	if (match[2] + match[3]) == HOSTNAME {
-		return false, errors.New("illegal url, you can not redirect to " + HOSTNAME)
+		return false, "illegal url, you can not redirect to " + HOSTNAME
 	}
-	return true, nil
+	return true, ""
 }
 
 func updateCacheURLData() (err error) {
