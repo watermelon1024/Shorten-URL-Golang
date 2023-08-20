@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -125,17 +126,17 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 	return
 }
 
-func (shortURL ShortURL) IsValid() (bool, string) {
+func (shortURL ShortURL) GetErrReason() error {
 	for _, blacklist := range customURLBlacklist {
 		if string(shortURL) == blacklist {
-			return false, "illegal custom url"
+			return errors.New("illegal custom url")
 		}
 	}
 	if !reCustomURL.MatchString(string(shortURL)) {
-		return false, "invalid custom url format(too long or illegal chars)"
+		return errors.New("invalid custom url format(too long or illegal chars)")
 	}
 
-	return true, ""
+	return nil
 }
 
 func (longURL LongURL) GetShortURL() (shortURL ShortURL, ok bool) {
@@ -152,15 +153,15 @@ func (longURL LongURL) GetData() (URLData, bool) {
 	return shortUrl.GetData()
 }
 
-func IsValidURL(addr string) (bool, string) {
+func IsValidURL(addr string) error {
 	match := reURL.FindStringSubmatch(addr)
 	if len(match) == 0 {
-		return false, "invalid url format"
+		return errors.New("invalid url format")
 	}
 	if (match[2] + match[3]) == HOSTNAME {
-		return false, "illegal url, you can not redirect to " + HOSTNAME
+		return errors.New("illegal url, you can not redirect to " + HOSTNAME)
 	}
-	return true, ""
+	return nil
 }
 
 func updateCacheURLData() (err error) {

@@ -71,8 +71,8 @@ func main() {
 		data.URL = utils.LongURL(strings.TrimSpace(string(data.URL)))
 		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		// check whether url format is valid
-		if valid, detail := utils.IsValidURL(string(data.URL)); !valid {
-			ctx.JSON(400, gin.H{"error": detail})
+		if err := utils.IsValidURL(string(data.URL)); err != nil {
+			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
 		if data.CustomURL == "" {
@@ -85,8 +85,8 @@ func main() {
 				}
 			}
 			// check whether shortURL format is valid
-		} else if valid, detail := data.CustomURL.IsValid(); !valid {
-			ctx.JSON(400, gin.H{"error": detail})
+		} else if err := data.CustomURL.GetErrReason(); err != nil {
+			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 			// check whether shortURL is used
 		} else if old, ok := data.CustomURL.GetData(); ok {
