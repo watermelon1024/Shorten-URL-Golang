@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"golang.org/x/net/html"
 )
@@ -66,7 +67,7 @@ func ExtractHtmlMetaFromString(htmlString string) HTMLMeta {
 }
 
 func ExtractHtmlMetaFromURL(url string) (HTMLMeta, error) {
-	client := http.Client{}
+	client := http.Client{Timeout: time.Second * 10}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return HTMLMeta{}, err
