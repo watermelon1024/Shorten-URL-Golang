@@ -15,6 +15,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  ID: ${{ github.head_ref }}.${{ github.sha }}
 
 jobs:
   build:
@@ -49,6 +50,7 @@ jobs:
         run: |
           GIT_COMMIT=$(git rev-list --all -1)
           echo $GIT_COMMIT
+          echo ${{ github.head_ref }}.${{ github.sha }}
           echo "GIT_COMMIT=$GIT_COMMIT" >> $GITHUB_OUTPUT
 
       # https://github.com/docker/metadata-action
@@ -57,7 +59,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          labels: git_commit=${{ steps.get-commit.outputs.GIT_COMMIT }}
+          labels: git_commit=${{ env.ID }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,enable=true,priority=600,prefix=,suffix=,event=branch
@@ -82,7 +84,7 @@ jobs:
           file: ./Dockerfile
           # linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
           platforms: linux/amd64
-          build-args: GIT_COMMIT=${{ steps.get-commit.outputs.GIT_COMMIT }}
+          build-args: GIT_COMMIT=${{ env.ID }}
 
       - name: Move cache
         run: |
