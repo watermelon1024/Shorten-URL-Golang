@@ -17,6 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var GIT_COMMIT string
+
 //go:embed all:views
 var webViews embed.FS
 
@@ -26,6 +28,8 @@ func init() {
 }
 
 func main() {
+	log.Println("Git Commit:", GIT_COMMIT)
+
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api") {
@@ -37,7 +41,7 @@ func main() {
 	router.SetHTMLTemplate(template.Must(template.New("").ParseFS(webViews, "views/redirect.html")))
 
 	router.GET("/:id", func(ctx *gin.Context) {
-		shortenID := utils.ShortURL(ctx.Param("id"))
+		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
 			urlData.IncreaseCount()
 
@@ -64,6 +68,8 @@ func main() {
 			ctx.JSON(400, gin.H{"error": "invalid JSON"})
 			return
 		}
+		data.URL = utils.LongURL(strings.TrimSpace(string(data.URL)))
+		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		// check whether url format is valid
 		if valid, errMessage := utils.IsValidURL(string(data.URL)); !valid {
 			ctx.JSON(400, gin.H{"error": errMessage})
@@ -97,7 +103,7 @@ func main() {
 		ctx.JSON(201, data.CreateShortURL())
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
-		shortenID := utils.ShortURL(ctx.Param("id"))
+		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
 			ctx.JSON(200, gin.H{
 				"targetURL":   urlData.TargetURL,
