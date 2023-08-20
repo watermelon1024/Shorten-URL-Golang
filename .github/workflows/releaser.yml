@@ -48,6 +48,7 @@ jobs:
         id: git-commit
         run: |
           GIT_COMMIT=$(git rev-list --all -1)
+          echo $GIT_COMMIT
           echo "GIT_COMMIT=$GIT_COMMIT" >> $GITHUB_OUTPUT
 
       # https://github.com/docker/metadata-action
