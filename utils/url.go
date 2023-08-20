@@ -34,6 +34,9 @@ var (
 	// URL validation regex
 	reURL       = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
 	reCustomURL = regexp.MustCompile(`^([a-zA-Z0-9]{1,32})$`)
+
+	// customURL blacklist
+	customURLBlacklist = []string{"api", "dashboard"}
 )
 
 func init() {
@@ -122,8 +125,17 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 	return
 }
 
-func (shortURL ShortURL) IsValid() bool {
-	return reCustomURL.MatchString(string(shortURL))
+func (shortURL ShortURL) IsValid() (bool, string) {
+	for _, blacklist := range customURLBlacklist {
+		if string(shortURL) == blacklist {
+			return false, "illegal custom url"
+		}
+	}
+	if !reCustomURL.MatchString(string(shortURL)) {
+		return false, "invalid custom url format(too long or illegal chars)"
+	}
+
+	return true, ""
 }
 
 func (longURL LongURL) GetShortURL() (shortURL ShortURL, ok bool) {
