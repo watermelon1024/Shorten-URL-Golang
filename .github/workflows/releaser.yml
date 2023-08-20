@@ -44,12 +44,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get Git Commit Hash
+        id: git-commit
+        run: |
+          GIT_COMMIT=$(git rev-list --all -1)
+          echo "GIT_COMMIT=$GIT_COMMIT" >> $GITHUB_OUTPUT
+
       # https://github.com/docker/metadata-action
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          labels: git_commit=${{ steps.get-commit.outputs.GIT_COMMIT }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,enable=true,priority=600,prefix=,suffix=,event=branch
@@ -63,12 +70,6 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: ${{ runner.os }}-buildx-
 
-      - name: Get Git Commit Hash
-        id: git-commit
-        run: |
-          GIT_COMMIT=$(git rev-list --all -1)
-          echo "GIT_COMMIT=$GIT_COMMIT" >> $GITHUB_ENV
-
       - uses: docker/build-push-action@v4
         with:
           context: .
@@ -78,7 +79,8 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           file: ./Dockerfile
-          platforms: linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
+          # linux/386,linux/amd64,linux/arm/v7,linux/arm64/v8
+          platforms: linux/amd64
           build-args: GIT_COMMIT=${{ steps.get-commit.outputs.GIT_COMMIT }}
 
       - name: Move cache
