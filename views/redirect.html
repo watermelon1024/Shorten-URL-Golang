@@ -9,9 +9,7 @@
     <meta property="og:description" content="{{ .description }}" />
     <title>{{ .title }}</title>
     <script>
-      window.onload = () => {
-        window.location.replace('{{ .targetURL }}');
-      };
+      window.onload = () => window.location.replace('{{ .targetURL }}');
     </script>
   </head>
 
