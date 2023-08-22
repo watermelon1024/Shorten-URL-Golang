@@ -53,6 +53,7 @@ func main() {
 			ctx.HTML(http.StatusOK, "redirect.html", gin.H{
 				"title":       urlData.Title,
 				"description": urlData.Description,
+				"image":       urlData.ImageURL,
 				"targetURL":   urlData.TargetURL,
 			})
 			return

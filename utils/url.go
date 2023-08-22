@@ -58,6 +58,7 @@ type CreateData struct {
 	URL         LongURL  `json:"url" binding:"required"`
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
+	ImageURL    string   `json:"image"`
 	CustomURL   ShortURL `json:"customUrl"`
 }
 
@@ -94,7 +95,7 @@ func (data CreateData) CreateShortURL() URLData {
 		Count:       0,
 		Title:       data.Title,
 		Description: data.Description,
-		// ImageURL:    data.ImageURL,
+		ImageURL:    data.ImageURL,
 	}
 	urlCache[shortURL] = urlData
 	longURLCache[longURL] = shortURL
