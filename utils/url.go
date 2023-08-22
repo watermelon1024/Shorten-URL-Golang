@@ -117,6 +117,9 @@ func (d *CreateData) InsertMeta() error {
 		if d.Description == "" {
 			d.Description = data.Description
 		}
+		if d.ImageURL == "" {
+			d.ImageURL = data.Image
+		}
 	}
 
 	return nil

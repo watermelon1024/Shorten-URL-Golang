@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/compose-spec/compose-go v1.18.2
 	github.com/gin-gonic/gin v1.9.1
+	go.uber.org/ratelimit v0.3.0
 	golang.org/x/net v0.14.0
 )
 
@@ -30,7 +31,6 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
-	go.uber.org/ratelimit v0.3.0 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
