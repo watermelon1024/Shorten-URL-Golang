@@ -59,6 +59,7 @@ type CreateData struct {
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
 	ImageURL    string   `json:"image"`
+	ThemeColor  string   `json:"themeColor"`
 	CustomURL   ShortURL `json:"customUrl"`
 }
 
@@ -119,6 +120,9 @@ func (d *CreateData) InsertMeta() error {
 		}
 		if d.ImageURL == "" {
 			d.ImageURL = data.Image
+		}
+		if d.ThemeColor == "" {
+			d.ThemeColor = data.ThemeColor
 		}
 	}
 

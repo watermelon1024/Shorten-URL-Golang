@@ -15,6 +15,7 @@ type HTMLMeta struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Image       string `json:"image"`
+	ThemeColor  string `json:"themeColor"`
 }
 
 func ExtractHtmlMeta(resp io.Reader) (data HTMLMeta) {
@@ -47,6 +48,8 @@ func ExtractHtmlMeta(resp io.Reader) (data HTMLMeta) {
 							data.Description = content
 						case "og:image":
 							data.Image = content
+						case "theme-color":
+							data.ThemeColor = content
 						}
 					}
 				}
