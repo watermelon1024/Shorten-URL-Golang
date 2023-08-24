@@ -63,7 +63,7 @@ func main() {
 	})
 
 	apiRouter := router.Group("/api")
-	apiRouter.Use(utils.LeakBucket()).POST("/shorten", func(ctx *gin.Context) {
+	apiRouter.Use(utils.LimiterMiddleware).POST("/shorten", func(ctx *gin.Context) {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
 			ctx.JSON(400, gin.H{"error": "invalid JSON(Original URL is required)"})

@@ -4,22 +4,23 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/ratelimit"
+	"github.com/ulule/limiter/v3"
+	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
-const RPS = 100
+var (
+	LimiterMiddleware gin.HandlerFunc
+)
 
-var limit = ratelimit.New(RPS)
+func init() {
+	rateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
+		Period: 10 * time.Minute,
+		Limit:  50,
+	})
 
-func LeakBucket() gin.HandlerFunc {
-	prev := time.Now()
-
-	return func(c *gin.Context) {
-		now := limit.Take()
-		if now.Sub(prev) < 10*time.Second {
-			c.JSON(429, gin.H{"error": "too many requests"})
-			c.Abort()
-		}
-		prev = now
-	}
+	LimiterMiddleware = mgin.NewMiddleware(rateLimiter, mgin.WithLimitReachedHandler(func(c *gin.Context) {
+		c.JSON(429, gin.H{"error": "too many requests"})
+		c.Abort()
+	}))
 }

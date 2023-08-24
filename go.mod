@@ -5,12 +5,11 @@ go 1.20
 require (
 	github.com/compose-spec/compose-go v1.18.2
 	github.com/gin-gonic/gin v1.9.1
-	go.uber.org/ratelimit v0.3.0
+	github.com/ulule/limiter/v3 v3.11.2
 	golang.org/x/net v0.14.0
 )
 
 require (
-	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/bytedance/sonic v1.10.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
