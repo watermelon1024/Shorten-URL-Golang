@@ -3,6 +3,7 @@ package utils
 import (
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 
 	limiter "github.com/ulule/limiter/v3"
