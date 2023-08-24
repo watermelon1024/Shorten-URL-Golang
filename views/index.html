@@ -157,39 +157,21 @@
       }
 
       #extra-config-btn {
-        display: flex;
         padding: 1px;
-      }
-
-      #extra-config-btn > div {
-        margin-left: 10px;
-        position: relative;
-        width: 16px;
-        height: 16px;
+        display: flex;
+        align-items: center;
       }
 
       #extra-config {
         display: none;
       }
 
-      #extra-config-box.show #extra-config-btn > div {
-        top: 0;
-        transform: rotate(180deg);
-        -webkit-transform: rotate(180deg);
+      #extra-config-box.show #extra-config-btn svg {
+        transform: rotate(180);
+        -webkit-transform: rotate(180);
       }
       #extra-config-box.show #extra-config {
         display: block;
-      }
-
-      .arrow {
-        border: solid white;
-        border-width: 0 3px 3px 0;
-        display: inline-block;
-        padding: 3px;
-        transform: rotate(45deg);
-        -webkit-transform: rotate(45deg);
-        position: absolute;
-        top: 3px;
       }
     </style>
   </head>
@@ -222,9 +204,15 @@
         <div class="extra-config-btn-box">
           <div id="extra-config-btn">
             <span>extra config</span>
-            <div>
-              <i class="arrow down"></i>
-            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24"
+              viewBox="0 -960 960 960"
+              width="24"
+              fill="white"
+            >
+              <path d="M480-345 240-585l43-43 197 198 197-197 43 43-240 239Z" />
+            </svg>
           </div>
         </div>
         <div id="extra-config">
