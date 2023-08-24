@@ -141,28 +141,60 @@
         padding: 5px 2.3px;
         transform: scale(1.05);
       }
+
+      #extra-config-box {
+        width: 100%;
+        display: flex;
+        position: relative;
+        flex-direction: column;
+      }
+      .extra-config-btn-box {
+        display: flex;
+        flex-direction: row-reverse;
+        margin-right: 12px;
+        cursor: pointer;
+      }
+
+      #extra-config-btn {
+        width: 16px;
+        height: 16px;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #extra-config {
+        display: none;
+      }
+
+      #extra-config-box.show #extra-config-btn {
+        transform: rotate(180deg);
+        -webkit-transform: rotate(180deg);
+      }
+      #extra-config-box.show #extra-config {
+        display: block;
+      }
+
+      .arrow {
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+      }
     </style>
   </head>
 
   <body>
     <div class="container">
       <h1>URL Shortener</h1>
+
       <input
         type="text"
         id="urlInput"
         placeholder="Original URL"
-        autocomplete="off"
-      />
-      <input
-        type="text"
-        id="titleInput"
-        placeholder="Custom Title (Optional)"
-        autocomplete="off"
-      />
-      <input
-        type="text"
-        id="descriptionInput"
-        placeholder="Custom Description (Optional)"
         autocomplete="off"
       />
       <div input id="customUrl-box">
@@ -178,6 +210,35 @@
           autocomplete="off"
         />
       </div>
+
+      <div id="extra-config-box">
+        <div class="extra-config-btn-box">
+          <div id="extra-config-btn">
+            <i class="arrow down"></i>
+          </div>
+        </div>
+        <div id="extra-config">
+          <input
+            type="text"
+            id="titleInput"
+            placeholder="Custom Title (Optional)"
+            autocomplete="off"
+          />
+          <input
+            type="text"
+            id="descriptionInput"
+            placeholder="Custom Description (Optional)"
+            autocomplete="off"
+          />
+          <input
+            type="text"
+            id="imageInput"
+            placeholder="Custom Image (Optional)"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
       <button id="shortenButton">Shorten the URL!</button>
       <div id="shortened-url">
         <span id="shortened-link"></span>
@@ -194,6 +255,8 @@
       const shortenedLink = document.getElementById('shortened-link');
       const copyButton = document.getElementById('copy-button');
       const customUrlBox = document.getElementById('customUrl-box');
+      const extraConfigBox = document.getElementById('extra-config-box');
+      const extraConfigBtn = document.getElementById('extra-config-btn');
 
       customUrlBox.addEventListener('click', () => customUrlInput.focus());
       customUrlInput.addEventListener('focus', () => {
@@ -201,6 +264,9 @@
       });
       customUrlBox.addEventListener('focusout', () => {
         customUrlBox.classList.remove('focus');
+      });
+      extraConfigBtn.addEventListener('click', () => {
+        extraConfigBox.classList.toggle('show');
       });
       shortenButton.addEventListener('click', async () => {
         shortenButton.disabled = true;
