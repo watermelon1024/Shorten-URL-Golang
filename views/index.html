@@ -148,6 +148,7 @@
         position: relative;
         flex-direction: column;
       }
+
       .extra-config-btn-box {
         display: flex;
         flex-direction: row-reverse;
@@ -156,19 +157,23 @@
       }
 
       #extra-config-btn {
+        display: flex;
+        padding: 1px;
+      }
+
+      #extra-config-btn > div {
+        margin-left: 10px;
+        position: relative;
         width: 16px;
         height: 16px;
-        padding: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
 
       #extra-config {
         display: none;
       }
 
-      #extra-config-box.show #extra-config-btn {
+      #extra-config-box.show #extra-config-btn > div {
+        top: 0;
         transform: rotate(180deg);
         -webkit-transform: rotate(180deg);
       }
@@ -183,6 +188,8 @@
         padding: 3px;
         transform: rotate(45deg);
         -webkit-transform: rotate(45deg);
+        position: absolute;
+        top: 3px;
       }
     </style>
   </head>
@@ -214,7 +221,10 @@
       <div id="extra-config-box">
         <div class="extra-config-btn-box">
           <div id="extra-config-btn">
-            <i class="arrow down"></i>
+            <span>extra config</span>
+            <div>
+              <i class="arrow down"></i>
+            </div>
           </div>
         </div>
         <div id="extra-config">
