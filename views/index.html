@@ -66,10 +66,10 @@
       } */
 
       input[type='color'] {
+        border: 0;
         padding: 0;
         appearance: none;
         background-color: transparent;
-        border: 0;
         width: var(--width);
         height: var(--height);
         cursor: pointer;
@@ -79,13 +79,10 @@
         content: '';
         position: absolute;
         top: 0;
-        left: 0;
         width: var(--width);
         height: var(--height);
         border-radius: 6px;
-        background-color: #e66465;
-        box-shadow: 0 0 0 2px #1a1a1a;
-        background-position: calc(var(--width) - 22px) 2px;
+        background-position: calc(var(--width) - 25px) 5px;
         background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M180-180h44l443-443-44-44-443 443v44Zm614-486L666-794l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248-120H120v-128l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>');
         background-repeat: no-repeat;
       }
@@ -257,7 +254,7 @@
         />
       </div>
 
-      <div id="extra-config-box" class="show">
+      <div id="extra-config-box">
         <div class="extra-config-btn-box">
           <div id="extra-config-btn">
             <span>extra config</span>
