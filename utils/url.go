@@ -33,7 +33,7 @@ var (
 	longURLCache = map[LongURL]ShortURL{}
 	fileLock     sync.Mutex
 	// URL validation regex
-	reURL       = regexp.MustCompile(`(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?`)
+	reURL       = regexp.MustCompile(`^(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?$`)
 	reCustomURL = regexp.MustCompile(`^([a-zA-Z0-9]{1,32})$`)
 
 	// customURL blacklist
@@ -55,7 +55,7 @@ type URLData struct {
 }
 
 type CreateData struct {
-	URL         LongURL  `json:"url" binding:"required"`
+	URL         LongURL  `json:"url"`
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
 	ImageURL    string   `json:"image"`
@@ -135,13 +135,16 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 }
 
 func (shortURL ShortURL) GetErrReason() error {
+	if !reCustomURL.MatchString(string(shortURL)) {
+		return errors.New("illegal custom url, only support [a-zA-Z0-9]")
+	}
+	if len(string(shortURL)) > 32 {
+		return errors.New("custom url is too long")
+	}
 	for _, blacklist := range customURLBlacklist {
 		if string(shortURL) == blacklist {
 			return errors.New("illegal custom url")
 		}
-	}
-	if !reCustomURL.MatchString(string(shortURL)) {
-		return errors.New("invalid custom url format(too long or illegal chars)")
 	}
 
 	return nil

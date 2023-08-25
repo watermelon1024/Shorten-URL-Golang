@@ -66,16 +66,21 @@ func main() {
 	apiRouter.Use(utils.LimiterMiddleware).POST("/shorten", func(ctx *gin.Context) {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid JSON(Original URL is required)"})
+			ctx.JSON(400, gin.H{"error": "invalid JSON"})
 			return
 		}
 		data.URL = utils.LongURL(strings.TrimSpace(string(data.URL)))
-		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
+		// check whether url is empty
+		if data.URL == "" {
+			ctx.JSON(400, gin.H{"error": "original URL is required"})
+			return
+		}
 		// check whether url format is valid
 		if err := data.URL.IsValid(); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		if data.CustomURL == "" {
 			// check whether longURL is in cache
 			if old, ok := data.URL.GetData(); ok {
