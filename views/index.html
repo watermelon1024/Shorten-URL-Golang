@@ -44,8 +44,58 @@
 
       .focus[input],
       input.focus,
-      input:focus {
+      input[type='text']:focus {
         border-color: #3498db !important;
+      }
+
+      /* label[input-file] {
+        position: relative;
+        display: flex;
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        text-align: center;
+        background: #efefef;
+        border: 1px solid #595656;
+        align-items: center;
+        justify-content: center;
+      }
+
+      label[input-file] input[type='file'] {
+        display: none;
+      } */
+
+      input[type='color'] {
+        padding: 0;
+        appearance: none;
+        background-color: transparent;
+        border: 0;
+        width: var(--width);
+        height: var(--height);
+        cursor: pointer;
+        position: relative;
+      }
+      input[type='color']::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--width);
+        height: var(--height);
+        border-radius: 6px;
+        background-color: #e66465;
+        box-shadow: 0 0 0 2px #1a1a1a;
+        background-position: calc(var(--width) - 22px) 2px;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M180-180h44l443-443-44-44-443 443v44Zm614-486L666-794l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248-120H120v-128l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>');
+        background-repeat: no-repeat;
+      }
+      input[type='color']::-webkit-color-swatch {
+        border-radius: 6px;
+        border: 0;
+      }
+      input[type='color']::-moz-color-swatch {
+        border-radius: 6px;
+        border: 0;
       }
 
       input[type='text'],
@@ -78,6 +128,7 @@
       #customUrl-box > #customUrlInput {
         flex: 1 1 auto;
         border: none;
+        padding-left: 0px;
       }
 
       button {
@@ -206,7 +257,7 @@
         />
       </div>
 
-      <div id="extra-config-box">
+      <div id="extra-config-box" class="show">
         <div class="extra-config-btn-box">
           <div id="extra-config-btn">
             <span>extra config</span>
@@ -234,10 +285,21 @@
             placeholder="Custom Description (Optional)"
             autocomplete="off"
           />
+          <!-- <label input-file>
+            <span>Custom Image (Optional)</span>
+            <input
+              type="file"
+              id="imageInput"
+              placeholder="Custom Image (Optional)"
+              autocomplete="off"
+            />
+          </label> -->
           <input
-            type="text"
-            id="imageInput"
-            placeholder="Custom Image (Optional)"
+            type="color"
+            id="themeColorInput"
+            value="#e66465"
+            style="--width: 5.5em; --height: 5.5em"
+            placeholder="theme color (Optional)"
             autocomplete="off"
           />
         </div>
