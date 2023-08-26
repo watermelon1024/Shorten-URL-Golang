@@ -81,6 +81,10 @@ func main() {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+		// if theme color is default (#000000), remove value
+		if data.Meta.ThemeColor == "#000000" {
+			data.Meta.ThemeColor = ""
+		}
 		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		if data.CustomURL == "" {
 			// check whether longURL is in cache
