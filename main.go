@@ -81,14 +81,6 @@ func main() {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		if !data.Meta.ImageURLIsValid() {
-			ctx.JSON(400, gin.H{"error": "invalid image url"})
-			return
-		}
-		// if theme color is default (#000000), remove value
-		if data.Meta.ThemeColor == "#000000" {
-			data.Meta.ThemeColor = ""
-		}
 		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		if data.CustomURL == "" {
 			// check whether longURL is in cache
@@ -114,7 +106,16 @@ func main() {
 		}
 
 		if data.Meta.HasData() {
+			// check whether image url format is valid
+			if !data.Meta.ImageURLIsValid() {
+				ctx.JSON(400, gin.H{"error": "invalid image url"})
+				return
+			}
 			data.InsertMeta()
+			// if theme color is default (#000000), remove value
+			if data.Meta.ThemeColor == "#000000" {
+				data.Meta.ThemeColor = ""
+			}
 		}
 
 		ctx.JSON(201, data.CreateShortURL())
