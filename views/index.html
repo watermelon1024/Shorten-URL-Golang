@@ -292,6 +292,12 @@
             />
           </label> -->
           <input
+            type="text"
+            id="imageUrlInput"
+            placeholder="Custom Description (Optional)"
+            autocomplete="off"
+          />
+          <input
             type="color"
             id="themeColorInput"
             value="#e66465"
@@ -314,6 +320,8 @@
       const urlInput = document.getElementById('urlInput');
       const titleInput = document.getElementById('titleInput');
       const descriptionInput = document.getElementById('descriptionInput');
+      const imageUrlInput = document.getElementById('imageUrlInput');
+      const themeColorInput = document.getElementById('themeColorInput');
       const customUrlInput = document.getElementById('customUrlInput');
       const shortenedLink = document.getElementById('shortened-link');
       const copyButton = document.getElementById('copy-button');
@@ -339,9 +347,13 @@
           method: 'POST',
           body: JSON.stringify({
             url: urlInput.value,
-            title: titleInput.value,
-            description: descriptionInput.value,
             customUrl: customUrlInput.value,
+            meta: {
+              title: titleInput.value,
+              description: descriptionInput.value,
+              image: imageUrlInput.value,
+              color: themeColorInput.value,
+            },
           }),
         })
           .then((d) => d.json())
@@ -349,7 +361,7 @@
             console.log(d);
             return d;
           })
-          .then(({ error, short, title, description }) => {
+          .then(({ error, short, meta}) => {
             if (error) {
               shortenButton.textContent = 'Shorten Failed!';
               alert(error);
@@ -360,9 +372,11 @@
               shortenedLink.style.display = 'inline-block';
               copyButton.style.display = 'inline-block';
               shortenButton.textContent = 'Shorten Successfully!';
-
-              titleInput.value = title;
-              descriptionInput.value = description;
+              // meta
+              titleInput.value = meta.title;
+              descriptionInput.value = meta.description;
+              imageUrlInput.value = meta.image;
+              themeColorInput.value = meta.color;
             }
           });
 
