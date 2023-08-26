@@ -44,16 +44,17 @@ func main() {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
 			urlData.IncreaseCount()
-
-			if len(urlData.Title) == 0 && len(urlData.Description) == 0 {
+			// no custom meta: header redirect
+			if !urlData.Meta.HasData() {
 				ctx.Redirect(http.StatusTemporaryRedirect, string(urlData.TargetURL))
 				return
 			}
-
+			// has custom meta: js redirect
 			ctx.HTML(http.StatusOK, "redirect.html", gin.H{
-				"title":       urlData.Title,
-				"description": urlData.Description,
-				"image":       urlData.ImageURL,
+				"title":       urlData.Meta.Title,
+				"description": urlData.Meta.Description,
+				"image":       urlData.Meta.ImageURL,
+				"color":       urlData.Meta.ThemeColor,
 				"targetURL":   urlData.TargetURL,
 			})
 			return
@@ -85,7 +86,7 @@ func main() {
 			// check whether longURL is in cache
 			if old, ok := data.URL.GetData(); ok {
 				// check whether meta data is same
-				if old.Title == data.Title && old.Description == data.Description {
+				if old.Meta == data.Meta {
 					ctx.JSON(200, old)
 					return
 				}
@@ -104,7 +105,9 @@ func main() {
 			return
 		}
 
-		data.InsertMeta()
+		if data.Meta.HasData() {
+			data.InsertMeta()
+		}
 
 		ctx.JSON(201, data.CreateShortURL())
 	})
