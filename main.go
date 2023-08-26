@@ -44,16 +44,17 @@ func main() {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
 			urlData.IncreaseCount()
-
-			if len(urlData.Title) == 0 && len(urlData.Description) == 0 {
+			// no custom meta: header redirect
+			if !urlData.Meta.HasData() {
 				ctx.Redirect(http.StatusTemporaryRedirect, string(urlData.TargetURL))
 				return
 			}
-
+			// has custom meta: js redirect
 			ctx.HTML(http.StatusOK, "redirect.html", gin.H{
-				"title":       urlData.Title,
-				"description": urlData.Description,
-				"image":       urlData.ImageURL,
+				"title":       urlData.Meta.Title,
+				"description": urlData.Meta.Description,
+				"image":       urlData.Meta.ImageURL,
+				"color":       urlData.Meta.ThemeColor,
 				"targetURL":   urlData.TargetURL,
 			})
 			return
@@ -80,23 +81,31 @@ func main() {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+		if !data.Meta.ImageURLIsValid() {
+			ctx.JSON(400, gin.H{"error": "invalid image url"})
+			return
+		}
+		// if theme color is default (#000000), remove value
+		if data.Meta.ThemeColor == "#000000" {
+			data.Meta.ThemeColor = ""
+		}
 		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		if data.CustomURL == "" {
 			// check whether longURL is in cache
 			if old, ok := data.URL.GetData(); ok {
 				// check whether meta data is same
-				if old.Title == data.Title && old.Description == data.Description {
+				if old.Meta == data.Meta {
 					ctx.JSON(200, old)
 					return
 				}
 			}
 			// check whether shortURL format is valid
-		} else if err := data.CustomURL.GetErrReason(); err != nil {
+		} else if err := data.CustomURL.IsValid(); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 			// check whether shortURL is used
 		} else if old, ok := data.CustomURL.GetData(); ok {
-			if data.URL != old.TargetURL {
+			if data.URL != old.TargetURL || data.Meta != old.Meta {
 				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			} else {
 				ctx.JSON(200, old)
@@ -104,20 +113,16 @@ func main() {
 			return
 		}
 
-		data.InsertMeta()
+		if data.Meta.HasData() {
+			data.InsertMeta()
+		}
 
 		ctx.JSON(201, data.CreateShortURL())
 	})
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
-			ctx.JSON(200, gin.H{
-				"targetURL":   urlData.TargetURL,
-				"title":       urlData.Title,
-				"description": urlData.Description,
-				"image":       urlData.ImageURL,
-				"count":       urlData.Count,
-			})
+			ctx.JSON(200, urlData)
 			return
 		}
 

@@ -45,22 +45,27 @@ func init() {
 	updateCacheURLData()
 }
 
-type URLData struct {
-	ShortURL    ShortURL `json:"short"`
-	TargetURL   LongURL  `json:"url"`
-	Count       int      `json:"count"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	ImageURL    string   `json:"image"`
+// Custom Meta
+type CustomMeta struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ImageURL    string `json:"image"`
+	ThemeColor  string `json:"color"`
 }
 
-type CreateData struct {
-	URL         LongURL  `json:"url"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	ImageURL    string   `json:"image"`
-	ThemeColor  string   `json:"themeColor"`
-	CustomURL   ShortURL `json:"customUrl"`
+func (meta *CustomMeta) HasData() bool {
+	return meta.Title != "" || meta.Description != "" || meta.ImageURL != "" || meta.ThemeColor != ""
+}
+func (meta *CustomMeta) ImageURLIsValid() bool {
+	return reURL.MatchString(meta.ImageURL)
+}
+
+// Shorten URL Data
+type URLData struct {
+	ShortURL  ShortURL   `json:"short"`
+	TargetURL LongURL    `json:"url"`
+	Meta      CustomMeta `json:"meta"`
+	Count     int        `json:"count"`
 }
 
 func (urlData *URLData) IncreaseCount() error {
@@ -83,7 +88,14 @@ func summonShortURL() ShortURL {
 	return ShortURL(shortURL)
 }
 
-func (data CreateData) CreateShortURL() URLData {
+// API Requests Data
+type CreateData struct {
+	URL       LongURL    `json:"url"`
+	CustomURL ShortURL   `json:"customUrl"`
+	Meta      CustomMeta `json:"meta"`
+}
+
+func (data *CreateData) CreateShortURL() URLData {
 	longURL := data.URL
 	shortURL := data.CustomURL
 	if shortURL == "" {
@@ -91,12 +103,9 @@ func (data CreateData) CreateShortURL() URLData {
 	}
 
 	urlData := URLData{
-		ShortURL:    shortURL,
-		TargetURL:   longURL,
-		Count:       0,
-		Title:       data.Title,
-		Description: data.Description,
-		ImageURL:    data.ImageURL,
+		ShortURL:  shortURL,
+		TargetURL: longURL,
+		Meta:      data.Meta,
 	}
 	urlCache[shortURL] = urlData
 	longURLCache[longURL] = shortURL
@@ -106,24 +115,24 @@ func (data CreateData) CreateShortURL() URLData {
 }
 
 func (d *CreateData) InsertMeta() error {
-	if d.Title == "" || d.Description == "" {
-		data, err := ExtractHtmlMetaFromURL(string(d.URL))
-		if err != nil {
-			log.Println("get meta error:", err)
-			return err
-		}
-		if d.Title == "" {
-			d.Title = data.Title
-		}
-		if d.Description == "" {
-			d.Description = data.Description
-		}
-		if d.ImageURL == "" {
-			d.ImageURL = data.Image
-		}
-		if d.ThemeColor == "" {
-			d.ThemeColor = data.ThemeColor
-		}
+	data, err := ExtractHtmlMetaFromURL(string(d.URL))
+	if err != nil {
+		log.Println("get meta error:", err)
+		return err
+	}
+
+	meta := &d.Meta
+	if meta.Title == "" {
+		meta.Title = data.Title
+	}
+	if meta.Description == "" {
+		meta.Description = data.Description
+	}
+	if meta.ImageURL == "" {
+		meta.ImageURL = data.Image
+	}
+	if meta.ThemeColor == "" {
+		meta.ThemeColor = data.ThemeColor
 	}
 
 	return nil
@@ -134,7 +143,7 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 	return
 }
 
-func (shortURL ShortURL) GetErrReason() error {
+func (shortURL ShortURL) IsValid() error {
 	if !reCustomURL.MatchString(string(shortURL)) {
 		return errors.New("illegal custom url, only support [a-zA-Z0-9]")
 	}
@@ -143,10 +152,9 @@ func (shortURL ShortURL) GetErrReason() error {
 	}
 	for _, blacklist := range customURLBlacklist {
 		if string(shortURL) == blacklist {
-			return errors.New("illegal custom url")
+			return errors.New("illegal custom url, you cannot use " + blacklist + " as custom url")
 		}
 	}
-
 	return nil
 }
 
@@ -160,7 +168,6 @@ func (longURL LongURL) GetData() (URLData, bool) {
 	if !ok {
 		return URLData{}, false
 	}
-
 	return shortUrl.GetData()
 }
 

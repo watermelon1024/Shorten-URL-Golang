@@ -66,8 +66,10 @@
       } */
 
       input[type='color'] {
-        border: 0;
+        border: 3px #ffffff solid;
+        border-radius: 5px;
         padding: 0;
+        margin: 0px 8px;
         appearance: none;
         background-color: transparent;
         width: var(--width);
@@ -82,7 +84,7 @@
         width: var(--width);
         height: var(--height);
         border-radius: 6px;
-        background-position: calc(var(--width) - 25px) 5px;
+        background-position: calc(var(--width) - 28px) 5px;
         background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20"><path d="M180-180h44l443-443-44-44-443 443v44Zm614-486L666-794l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248-120H120v-128l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>');
         background-repeat: no-repeat;
       }
@@ -226,6 +228,13 @@
 
       #extra-config-box.show #extra-config {
         display: block;
+        margin-bottom: 16px;
+      }
+
+      #extra-config-box #theme-color-input-box {
+        display: flex;
+        align-items: center;
+        margin: 0px 8px;
       }
     </style>
   </head>
@@ -292,13 +301,22 @@
             />
           </label> -->
           <input
-            type="color"
-            id="themeColorInput"
-            value="#e66465"
-            style="--width: 5.5em; --height: 5.5em"
-            placeholder="theme color (Optional)"
+            type="text"
+            id="imageUrlInput"
+            placeholder="Custom Image URL (Optional)"
             autocomplete="off"
           />
+          <div id="theme-color-input-box">
+            <span>Custom Theme Color (Optional)</span>
+            <input
+            type="color"
+            id="themeColorInput"
+            value="#000000"
+            style="--width: 6em; --height: 3em"
+            placeholder="theme color (Optional)"
+            autocomplete="off"
+            />
+          </div>
         </div>
       </div>
 
@@ -314,6 +332,8 @@
       const urlInput = document.getElementById('urlInput');
       const titleInput = document.getElementById('titleInput');
       const descriptionInput = document.getElementById('descriptionInput');
+      const imageUrlInput = document.getElementById('imageUrlInput');
+      const themeColorInput = document.getElementById('themeColorInput');
       const customUrlInput = document.getElementById('customUrlInput');
       const shortenedLink = document.getElementById('shortened-link');
       const copyButton = document.getElementById('copy-button');
@@ -339,9 +359,13 @@
           method: 'POST',
           body: JSON.stringify({
             url: urlInput.value,
-            title: titleInput.value,
-            description: descriptionInput.value,
             customUrl: customUrlInput.value,
+            meta: {
+              title: titleInput.value,
+              description: descriptionInput.value,
+              image: imageUrlInput.value,
+              color: themeColorInput.value,
+            },
           }),
         })
           .then((d) => d.json())
@@ -349,7 +373,7 @@
             console.log(d);
             return d;
           })
-          .then(({ error, short, title, description }) => {
+          .then(({ error, short, meta}) => {
             if (error) {
               shortenButton.textContent = 'Shorten Failed!';
               alert(error);
@@ -360,9 +384,11 @@
               shortenedLink.style.display = 'inline-block';
               copyButton.style.display = 'inline-block';
               shortenButton.textContent = 'Shorten Successfully!';
-
-              titleInput.value = title;
-              descriptionInput.value = description;
+              // meta
+              titleInput.value = meta.title;
+              descriptionInput.value = meta.description;
+              imageUrlInput.value = meta.image;
+              themeColorInput.value = meta.color;
             }
           });
 
