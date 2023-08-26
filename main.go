@@ -114,13 +114,7 @@ func main() {
 	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
-			ctx.JSON(200, gin.H{
-				"targetURL":   urlData.TargetURL,
-				"title":       urlData.Title,
-				"description": urlData.Description,
-				"image":       urlData.ImageURL,
-				"count":       urlData.Count,
-			})
+			ctx.JSON(200, urlData)
 			return
 		}
 
