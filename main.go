@@ -81,6 +81,10 @@ func main() {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+		if !data.Meta.ImageURLIsValid() {
+			ctx.JSON(400, gin.H{"error": "invalid image url"})
+			return
+		}
 		// if theme color is default (#000000), remove value
 		if data.Meta.ThemeColor == "#000000" {
 			data.Meta.ThemeColor = ""
@@ -101,7 +105,7 @@ func main() {
 			return
 			// check whether shortURL is used
 		} else if old, ok := data.CustomURL.GetData(); ok {
-			if data.URL != old.TargetURL {
+			if data.URL != old.TargetURL || data.Meta != old.Meta {
 				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			} else {
 				ctx.JSON(200, old)

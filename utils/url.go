@@ -56,6 +56,9 @@ type CustomMeta struct {
 func (meta *CustomMeta) HasData() bool {
 	return meta.Title != "" || meta.Description != "" || meta.ImageURL != "" || meta.ThemeColor != ""
 }
+func (meta *CustomMeta) ImageURLIsValid() bool {
+	return reURL.MatchString(meta.ImageURL)
+}
 
 // Shorten URL Data
 type URLData struct {
