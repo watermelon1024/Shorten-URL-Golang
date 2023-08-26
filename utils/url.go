@@ -140,7 +140,7 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 	return
 }
 
-func (shortURL ShortURL) GetErrReason() error {
+func (shortURL ShortURL) IsValid() error {
 	if !reCustomURL.MatchString(string(shortURL)) {
 		return errors.New("illegal custom url, only support [a-zA-Z0-9]")
 	}
@@ -149,10 +149,9 @@ func (shortURL ShortURL) GetErrReason() error {
 	}
 	for _, blacklist := range customURLBlacklist {
 		if string(shortURL) == blacklist {
-			return errors.New("illegal custom url")
+			return errors.New("illegal custom url, you cannot use " + blacklist + " as custom url")
 		}
 	}
-
 	return nil
 }
 
@@ -166,7 +165,6 @@ func (longURL LongURL) GetData() (URLData, bool) {
 	if !ok {
 		return URLData{}, false
 	}
-
 	return shortUrl.GetData()
 }
 

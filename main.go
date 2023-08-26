@@ -92,7 +92,7 @@ func main() {
 				}
 			}
 			// check whether shortURL format is valid
-		} else if err := data.CustomURL.GetErrReason(); err != nil {
+		} else if err := data.CustomURL.IsValid(); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 			// check whether shortURL is used
