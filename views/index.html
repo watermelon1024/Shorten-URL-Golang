@@ -236,6 +236,29 @@
         align-items: center;
         margin: 0px 8px;
       }
+
+      @media (max-width: 800px) {
+        .container {
+          width: 85%;
+        }
+
+        input[type='text'],
+        #customUrl-box {
+          font-size: 14px;
+        }
+
+        h1 {
+          font-size: 3.3vw;
+        }
+
+        span {
+          font-size: 2.1vw;
+        }
+
+        #shortenButton {
+          font-size: 2.1vw;
+        }
+      }
     </style>
   </head>
 
@@ -256,8 +279,10 @@
           </script>
         </p>
         <input
-          type="text"
           id="customUrlInput"
+          type="text"
+          pattern="[\w\-]{1,32}"
+          oninput="this.reportValidity()"
           placeholder="Custom URL (Optional)"
           autocomplete="off"
         />
@@ -309,12 +334,12 @@
           <div id="theme-color-input-box">
             <span>Custom Theme Color (Optional)</span>
             <input
-            type="color"
-            id="themeColorInput"
-            value="#000000"
-            style="--width: 6em; --height: 3em"
-            placeholder="theme color (Optional)"
-            autocomplete="off"
+              type="color"
+              id="themeColorInput"
+              value="#000000"
+              style="--width: 6em; --height: 3em"
+              placeholder="theme color (Optional)"
+              autocomplete="off"
             />
           </div>
         </div>
@@ -364,7 +389,8 @@
               title: titleInput.value,
               description: descriptionInput.value,
               image: imageUrlInput.value,
-              color: themeColorInput.value != '#000000' ? themeColorInput.value : '',
+              color:
+                themeColorInput.value != '#000000' ? themeColorInput.value : '',
             },
           }),
         })
@@ -373,7 +399,7 @@
             console.log(d);
             return d;
           })
-          .then(({ error, short, meta}) => {
+          .then(({ error, short, meta }) => {
             if (error) {
               shortenButton.textContent = 'Shorten Failed!';
               shortenedLink.textContent = '';

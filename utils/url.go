@@ -15,7 +15,7 @@ var HOSTNAME string
 
 const (
 	DATA_PATH  = "urls.json"
-	SHORT_KEYS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	SHORT_KEYS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
 )
 
 type (
@@ -34,7 +34,7 @@ var (
 	fileLock     sync.Mutex
 	// URL validation regex
 	reURL       = regexp.MustCompile(`^(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?$`)
-	reCustomURL = regexp.MustCompile(`^([a-zA-Z0-9]{1,32})$`)
+	reCustomURL = regexp.MustCompile(`^([\w\-]{1,32})$`)
 
 	// customURL blacklist
 	customURLBlacklist = []string{"api", "dashboard"}
@@ -144,11 +144,11 @@ func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
 }
 
 func (shortURL ShortURL) IsValid() error {
-	if !reCustomURL.MatchString(string(shortURL)) {
-		return errors.New("illegal custom url, only support [a-zA-Z0-9]")
-	}
 	if len(string(shortURL)) > 32 {
 		return errors.New("custom url is too long")
+	}
+	if !reCustomURL.MatchString(string(shortURL)) {
+		return errors.New("illegal custom url, only support [a-zA-Z0-9_-]")
 	}
 	for _, blacklist := range customURLBlacklist {
 		if string(shortURL) == blacklist {
