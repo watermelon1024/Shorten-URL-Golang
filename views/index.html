@@ -266,7 +266,7 @@
       <div id="extra-config-box">
         <div class="extra-config-btn-box">
           <div id="extra-config-btn">
-            <span>extra config</span>
+            <span>Extra Config</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24"
@@ -364,7 +364,7 @@
               title: titleInput.value,
               description: descriptionInput.value,
               image: imageUrlInput.value,
-              color: themeColorInput.value,
+              color: themeColorInput.value != '#000000' ? themeColorInput.value : '',
             },
           }),
         })
@@ -376,6 +376,7 @@
           .then(({ error, short, meta}) => {
             if (error) {
               shortenButton.textContent = 'Shorten Failed!';
+              shortenedLink.textContent = '';
               alert(error);
             } else {
               const shortenedUrl = `${location.origin}/${encodeURI(short)}`;

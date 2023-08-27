@@ -104,18 +104,14 @@ func main() {
 			}
 			return
 		}
-
+		// if has meta, insert empty meta field
 		if data.Meta.HasData() {
 			// check whether image url format is valid
-			if !data.Meta.ImageURLIsValid() {
+			if data.Meta.ImageURL != "" && !data.Meta.ImageURLIsValid() {
 				ctx.JSON(400, gin.H{"error": "invalid image url"})
 				return
 			}
 			data.InsertMeta()
-			// if theme color is default (#000000), remove value
-			if data.Meta.ThemeColor == "#000000" {
-				data.Meta.ThemeColor = ""
-			}
 		}
 
 		ctx.JSON(201, data.CreateShortURL())
