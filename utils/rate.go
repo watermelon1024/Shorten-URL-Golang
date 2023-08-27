@@ -10,17 +10,35 @@ import (
 )
 
 var (
-	LimiterMiddleware gin.HandlerFunc
+	RedirectLimiter gin.HandlerFunc
+	GetShortenLimiter  gin.HandlerFunc
+	ShortenLimiter  gin.HandlerFunc
 )
 
 func init() {
-	rateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
+	// GET "/:id"
+	redirectRateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
+		Period: 3 * time.Second,
+		Limit:  3,
+	})
+	RedirectLimiter = mgin.NewMiddleware(redirectRateLimiter, mgin.WithLimitReachedHandler(limitReachedHandler))
+	
+	// GET "/api/get/:id"
+	getShortenRateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
 		Period: 10 * time.Minute,
 		Limit:  50,
 	})
+	GetShortenLimiter = mgin.NewMiddleware(getShortenRateLimiter, mgin.WithLimitReachedHandler(limitReachedHandler))
 
-	LimiterMiddleware = mgin.NewMiddleware(rateLimiter, mgin.WithLimitReachedHandler(func(c *gin.Context) {
-		c.JSON(429, gin.H{"error": "too many requests"})
-		c.Abort()
-	}))
+	// POST "/api/shorten"
+	shortenRateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
+		Period: 10 * time.Minute,
+		Limit:  50,
+	})
+	ShortenLimiter = mgin.NewMiddleware(shortenRateLimiter, mgin.WithLimitReachedHandler(limitReachedHandler))
+}
+
+func limitReachedHandler(c *gin.Context) {
+	c.JSON(429, gin.H{"error": "too many requests"})
+	c.Abort()
 }

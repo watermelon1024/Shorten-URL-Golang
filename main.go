@@ -40,7 +40,7 @@ func main() {
 
 	router.SetHTMLTemplate(template.Must(template.New("").ParseFS(webViews, "views/redirect.html")))
 
-	router.GET("/:id", func(ctx *gin.Context) {
+	router.Use(utils.RedirectLimiter).GET("/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
 			urlData.IncreaseCount()
@@ -64,7 +64,7 @@ func main() {
 	})
 
 	apiRouter := router.Group("/api")
-	apiRouter.Use(utils.LimiterMiddleware).POST("/shorten", func(ctx *gin.Context) {
+	apiRouter.Use(utils.ShortenLimiter).POST("/shorten", func(ctx *gin.Context) {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
 			ctx.JSON(400, gin.H{"error": "invalid JSON"})
@@ -116,7 +116,7 @@ func main() {
 
 		ctx.JSON(201, data.CreateShortURL())
 	})
-	apiRouter.GET("/get/:id", func(ctx *gin.Context) {
+	apiRouter.Use(utils.GetShortenLimiter).GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, ok := shortenID.GetData(); ok {
 			ctx.JSON(200, urlData)
