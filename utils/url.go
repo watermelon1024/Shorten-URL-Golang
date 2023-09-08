@@ -53,9 +53,6 @@ type CustomMeta struct {
 	ThemeColor  string `json:"color"`
 }
 
-func (meta *CustomMeta) HasData() bool {
-	return meta.Title != "" || meta.Description != "" || meta.ImageURL != "" || meta.ThemeColor != ""
-}
 func (meta *CustomMeta) ImageURLIsValid() bool {
 	return reURL.MatchString(meta.ImageURL)
 }
@@ -121,7 +118,7 @@ func (d *CreateData) InsertMeta() error {
 		return err
 	}
 
-	meta := &d.Meta
+	meta := d.Meta
 	if meta.Title == "" {
 		meta.Title = data.Title
 	}

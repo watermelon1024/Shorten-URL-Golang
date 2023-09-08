@@ -45,7 +45,7 @@ func main() {
 		if urlData, ok := shortenID.GetData(); ok {
 			urlData.IncreaseCount()
 			// no custom meta: header redirect
-			if !urlData.Meta.HasData() {
+			if urlData.Meta == nil {
 				ctx.Redirect(http.StatusTemporaryRedirect, string(urlData.TargetURL))
 				return
 			}
@@ -105,7 +105,7 @@ func main() {
 			return
 		}
 		// if has meta, insert empty meta field
-		if data.Meta.HasData() {
+		if data.Meta != nil {
 			// check whether image url format is valid
 			if data.Meta.ImageURL != "" && !data.Meta.ImageURLIsValid() {
 				ctx.JSON(400, gin.H{"error": "invalid image url"})
