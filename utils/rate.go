@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	RedirectLimiter gin.HandlerFunc
-	GetShortenLimiter  gin.HandlerFunc
-	ShortenLimiter  gin.HandlerFunc
+	RedirectLimiter   gin.HandlerFunc
+	GetShortenLimiter gin.HandlerFunc
+	ShortenLimiter    gin.HandlerFunc
 )
 
 func init() {
@@ -22,7 +22,7 @@ func init() {
 		Limit:  3,
 	})
 	RedirectLimiter = mgin.NewMiddleware(redirectRateLimiter, mgin.WithLimitReachedHandler(limitReachedHandler))
-	
+
 	// GET "/api/get/:id"
 	getShortenRateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
 		Period: 10 * time.Minute,
