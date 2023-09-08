@@ -53,19 +53,16 @@ type CustomMeta struct {
 	ThemeColor  string `json:"color"`
 }
 
-func (meta *CustomMeta) HasData() bool {
-	return meta.Title != "" || meta.Description != "" || meta.ImageURL != "" || meta.ThemeColor != ""
-}
 func (meta *CustomMeta) ImageURLIsValid() bool {
 	return reURL.MatchString(meta.ImageURL)
 }
 
 // Shorten URL Data
 type URLData struct {
-	ShortURL  ShortURL   `json:"short"`
-	TargetURL LongURL    `json:"url"`
-	Meta      CustomMeta `json:"meta"`
-	Count     int        `json:"count"`
+	ShortURL  ShortURL    `json:"short"`
+	TargetURL LongURL     `json:"url"`
+	Meta      *CustomMeta `json:"meta"`
+	Count     int         `json:"count"`
 }
 
 func (urlData *URLData) IncreaseCount() error {
@@ -90,9 +87,9 @@ func summonShortURL() ShortURL {
 
 // API Requests Data
 type CreateData struct {
-	URL       LongURL    `json:"url"`
-	CustomURL ShortURL   `json:"customUrl"`
-	Meta      CustomMeta `json:"meta"`
+	URL       LongURL     `json:"url"`
+	CustomURL ShortURL    `json:"customUrl"`
+	Meta      *CustomMeta `json:"meta"`
 }
 
 func (data *CreateData) CreateShortURL() URLData {
@@ -121,7 +118,7 @@ func (d *CreateData) InsertMeta() error {
 		return err
 	}
 
-	meta := &d.Meta
+	meta := d.Meta
 	if meta.Title == "" {
 		meta.Title = data.Title
 	}
