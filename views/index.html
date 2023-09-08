@@ -379,19 +379,22 @@
       shortenButton.addEventListener('click', async () => {
         shortenButton.disabled = true;
         shortenButton.textContent = 'Shortening...';
+        let metaValue = null;
+        if (titleInput.value || descriptionInput.value || imageUrlInput.value || themeColorInput.value != '#000000') {
+          metaValue = {
+            title: titleInput.value,
+            description: descriptionInput.value,
+            image: imageUrlInput.value,
+            color: themeColorInput.value,
+          }
+        }
 
         await fetch('/api/shorten', {
           method: 'POST',
           body: JSON.stringify({
             url: urlInput.value,
             customUrl: customUrlInput.value,
-            meta: {
-              title: titleInput.value,
-              description: descriptionInput.value,
-              image: imageUrlInput.value,
-              color:
-                themeColorInput.value != '#000000' ? themeColorInput.value : '',
-            },
+            meta: metaValue,
           }),
         })
           .then((d) => d.json())
