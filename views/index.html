@@ -415,10 +415,12 @@
               copyButton.style.display = 'inline-block';
               shortenButton.textContent = 'Shorten Successfully!';
               // meta
-              titleInput.value = meta.title;
-              descriptionInput.value = meta.description;
-              imageUrlInput.value = meta.image;
-              themeColorInput.value = meta.color;
+              if (meta != null) {
+                titleInput.value = meta.title;
+                descriptionInput.value = meta.description;
+                imageUrlInput.value = meta.image;
+                themeColorInput.value = meta.color;
+              }
             }
           });
 
