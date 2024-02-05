@@ -33,7 +33,7 @@ func main() {
 	router := gin.Default()
 	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api") {
-			c.JSON(404, gin.H{"error": "not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			c.Abort()
 		}
 	})
@@ -42,7 +42,7 @@ func main() {
 
 	router.Use(utils.RedirectLimiter).GET("/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
-		if urlData, ok := shortenID.GetData(); ok {
+		if urlData, err := shortenID.GetData(); urlData != nil {
 			urlData.IncreaseCount()
 			// no custom meta: header redirect
 			if urlData.Meta == nil {
@@ -58,6 +58,9 @@ func main() {
 				"targetURL":   urlData.TargetURL,
 			})
 			return
+		} else if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
 		}
 
 		AddFileHandler(webViews)(ctx)
@@ -67,6 +70,7 @@ func main() {
 	apiRouter.Use(utils.ShortenLimiter).POST("/shorten", func(ctx *gin.Context) {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
+			// check data is valid
 			ctx.JSON(400, gin.H{"error": "invalid JSON"})
 			return
 		}
@@ -81,22 +85,27 @@ func main() {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+		// check whether custom url has been used
 		data.CustomURL = utils.ShortURL(strings.TrimSpace(string(data.CustomURL)))
 		if data.CustomURL == "" {
-			// check whether longURL is in cache
-			if old, ok := data.URL.GetData(); ok {
-				// check whether meta data is same
-				if old.Meta == data.Meta {
-					ctx.JSON(200, old)
-					return
-				}
+			// check whether meta data is same
+			if urlDate, err := data.URL.CheckMetaSame(data); urlDate != nil {
+				// data exists and same, return it
+				ctx.JSON(200, gin.H{
+					"short": string(urlDate.ShortURL),
+					"url":   data.URL,
+					"meta":  data.Meta})
+				return
+			} else if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+				return
 			}
-			// check whether shortURL format is valid
 		} else if err := data.CustomURL.IsValid(); err != nil {
+			// check whether shortURL format is valid
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
-			// check whether shortURL is used
-		} else if old, ok := data.CustomURL.GetData(); ok {
+		} else if old, err := data.CustomURL.GetData(); err == nil {
+			// check whether shortURL has been used
 			if data.URL != old.TargetURL || data.Meta != old.Meta {
 				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			} else {
@@ -104,7 +113,7 @@ func main() {
 			}
 			return
 		}
-		// if has meta, insert empty meta field
+		// if has meta, fill meta field
 		if data.Meta != nil {
 			// check whether image url format is valid
 			if data.Meta.ImageURL != "" && !data.Meta.ImageURLIsValid() {
@@ -114,12 +123,23 @@ func main() {
 			data.InsertMeta()
 		}
 
-		ctx.JSON(201, data.CreateShortURL())
+		// create short url
+		urlDate, err := data.CreateShortURL()
+		if err != nil {
+			ctx.JSON(500, gin.H{"error": "internal server error"})
+			return
+		}
+
+		ctx.JSON(201, urlDate)
 	})
+
 	apiRouter.Use(utils.GetShortenLimiter).GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
-		if urlData, ok := shortenID.GetData(); ok {
+		if urlData, err := shortenID.GetData(); urlData != nil {
 			ctx.JSON(200, urlData)
+			return
+		} else if err != nil {
+			ctx.JSON(500, gin.H{"error": "internal server error"})
 			return
 		}
 
