@@ -1,14 +1,17 @@
 package utils
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"regexp"
-	"sync"
+
+	"github.com/mattn/go-sqlite3"
 )
 
 var HOSTNAME string
@@ -24,6 +27,8 @@ type (
 )
 
 var (
+	// sqlite database
+	db        *sql.DB
 	SHORT_LEN = len(SHORT_KEYS)
 	// short -> long
 	// [k: ShortURL as string]: LongURL as URLData struct
@@ -42,7 +47,48 @@ var (
 
 func init() {
 	HOSTNAME = os.Getenv("HOSTNAME")
-	updateCacheURLData()
+
+	dbFilePath := os.Getenv("DB_PATH")
+	// check/create database dir
+	dir := filepath.Dir(dbFilePath)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		// dir not exist, create it
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			log.Fatalln("Error creating directory:", dir)
+		}
+	}
+
+	// check/create database file
+	if _, err := os.Stat(dbFilePath); os.IsNotExist(err) {
+		// file not exist, create it
+		file, err := os.Create(dbFilePath)
+		if err != nil {
+			log.Fatalln("Error creating database file:", err)
+		}
+		file.Close()
+	}
+
+	// connect to database
+	db, err := sql.Open("sqlite3", dbFilePath)
+	if err != nil {
+		log.Fatalln("Error opening database:", err)
+	}
+
+	db.Exec(`CREATE TABLE IF NOT EXISTS urls (
+		id TEXT PRIMARY KEY,
+		target_url TEXT NOT NULL,
+		meta TEXT,
+		count INTEGER DEFAULT 0,
+		created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+		created_by TEXT,
+		ip TEXT,
+		expired_at TEXT
+	)`)
+}
+
+func CloseDB() error {
+	return db.Close()
 }
 
 // Custom Meta

@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/compose-spec/compose-go v1.18.2
 	github.com/gin-gonic/gin v1.9.1
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/ulule/limiter/v3 v3.11.2
 	golang.org/x/net v0.14.0
 )
