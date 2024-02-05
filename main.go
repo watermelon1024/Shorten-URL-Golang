@@ -104,13 +104,19 @@ func main() {
 			// check whether shortURL format is valid
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
-		} else if old, err := data.CustomURL.GetData(); err == nil {
+		} else if old, err := data.CustomURL.GetData(); old != nil {
 			// check whether shortURL has been used
 			if data.URL != old.TargetURL || data.Meta != old.Meta {
+				// used
 				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
 			} else {
+				// same as old, return it
 				ctx.JSON(200, old)
 			}
+			return
+		} else if err != nil {
+			// db error
+			ctx.JSON(500, gin.H{"error": "internal server error"})
 			return
 		}
 		// if has meta, fill meta field
