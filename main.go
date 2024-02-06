@@ -164,10 +164,10 @@ func main() {
 
 	go func() {
 		log.Println("Server starting...")
-		log.Println("listen", srv.Addr)
+		log.Println("Listening at:", srv.Addr)
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			log.Fatalln("An error occurred:", err)
 		}
 	}()
 
@@ -180,7 +180,7 @@ func main() {
 	defer cancel()
 	utils.CloseDB()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Shutdown Error: ", err)
+		log.Fatalln("Shutdown Error:", err)
 	}
 	log.Println("Server has been shutdown.")
 }

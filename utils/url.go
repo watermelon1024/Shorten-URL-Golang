@@ -156,14 +156,12 @@ func (data *CreateData) createShortURL(meta any) (string, error) {
 		shortURL, data.URL, meta)
 	if err != nil {
 		if errors.Is(err, sqlite3.ErrConstraint) {
-			log.Println("error detect using 'Is'")
 			return data.createShortURL(meta)
 		}
 		if sqliteErr, ok := err.(sqlite3.Error); ok {
 			errors.Is(sqliteErr, sqlite3.ErrConstraintUnique)
 			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique ||
 				sqliteErr.ExtendedCode == sqlite3.ErrConstraintPrimaryKey {
-				log.Println("error detect using 'ok'")
 				return data.createShortURL(meta)
 			}
 		}
@@ -176,7 +174,7 @@ func (data *CreateData) createShortURL(meta any) (string, error) {
 func (data *CreateData) InsertMeta() error {
 	htmlMeta, err := ExtractHtmlMetaFromURL(string(data.URL))
 	if err != nil {
-		log.Println("get meta error:", err)
+		log.Println("Error getting meta:", err)
 		return err
 	}
 
@@ -258,7 +256,6 @@ func (shortURL ShortURL) IsValid() error {
 func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err error) {
 	rows, err := db.Query("SELECT id, meta FROM urls WHERE target_url = ?", string(longURL))
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -291,28 +288,6 @@ func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err err
 
 	return nil, nil
 }
-
-// func (longURL LongURL) GetShortURL() (*sql.Rows, error) {
-// 	return db.Query("SELECT * FROM urls WHERE target_url = ?", string(longURL))
-// }
-
-// func (longURL LongURL) GetData() (URLData, bool, error) {
-// 	rows, err := longURL.GetShortURL()
-// 	if err != nil {
-// 		return URLData{}, false, nil
-// 	}
-// 	defer rows.Close()
-
-// 	for rows.Next() {
-// 		var id string
-// 		var meta string
-// 		err := rows.Scan(&id, &meta)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 	}
-// 	return ShortURL("").GetData()
-// }
 
 func (longURL LongURL) IsValid() error {
 	match := reURL.FindStringSubmatch(string(longURL))
