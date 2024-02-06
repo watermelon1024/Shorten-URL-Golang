@@ -121,6 +121,7 @@ type CreateData struct {
 	Meta      *CustomMeta `json:"meta"`
 }
 
+// Create a short URL
 func (data *CreateData) CreateShortURL() (*URLData, error) {
 	longURL := data.URL
 	var metaString any = nil
@@ -142,6 +143,8 @@ func (data *CreateData) CreateShortURL() (*URLData, error) {
 		Meta:      data.Meta,
 	}, nil
 }
+
+// Create a short URL (inner function)
 func (data *CreateData) createShortURL(meta any) (string, error) {
 	shortURL := ""
 	if data.CustomURL == "" {
@@ -171,6 +174,7 @@ func (data *CreateData) createShortURL(meta any) (string, error) {
 	return shortURL, nil
 }
 
+// Insert meta into short url
 func (data *CreateData) InsertMeta() error {
 	htmlMeta, err := ExtractHtmlMetaFromURL(string(data.URL))
 	if err != nil {
@@ -197,6 +201,7 @@ func (data *CreateData) InsertMeta() error {
 
 // ShortURL functions
 
+// Get url data from database
 func (shortURL ShortURL) GetData() (urlData *URLData, err error) {
 	var (
 		id         string
@@ -236,6 +241,7 @@ func (shortURL ShortURL) GetData() (urlData *URLData, err error) {
 	}, nil
 }
 
+// check if short url format is valid
 func (shortURL ShortURL) IsValid() error {
 	if len(string(shortURL)) > 32 {
 		return errors.New("custom url is too long")
@@ -253,6 +259,7 @@ func (shortURL ShortURL) IsValid() error {
 
 // LongURL functions
 
+// Check if long url meta which is in database is same as create data meta
 func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err error) {
 	rows, err := db.Query("SELECT id, meta FROM urls WHERE target_url = ?", string(longURL))
 	if err != nil {
@@ -289,6 +296,7 @@ func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err err
 	return nil, nil
 }
 
+// Check if long url format is valid
 func (longURL LongURL) IsValid() error {
 	match := reURL.FindStringSubmatch(string(longURL))
 	if len(match) == 0 {
