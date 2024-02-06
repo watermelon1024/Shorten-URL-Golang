@@ -110,8 +110,12 @@ func (data *CreateData) createShortURL(meta any) (string, error) {
 	_, err := db.Exec("INSERT INTO urls (id, target_url, meta) VALUES (?, ?, ?)",
 		shortURL, data.URL, meta)
 	if err != nil {
-		if errors.Is(err, sqlite3.ErrConstraint) {
-			return data.createShortURL(meta)
+		if sqlErr, ok := err.(sqlite3.Error); ok {
+			// ErrConstraintPrimaryKey
+			if sqlErr.ExtendedCode == sqlite3.ErrConstraintPrimaryKey {
+				// retry
+				return data.createShortURL(meta)
+			}
 		}
 		return "", err
 	}
