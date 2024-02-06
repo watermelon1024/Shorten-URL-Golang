@@ -113,13 +113,6 @@ func (data *CreateData) createShortURL(meta any) (string, error) {
 		if errors.Is(err, sqlite3.ErrConstraint) {
 			return data.createShortURL(meta)
 		}
-		if sqliteErr, ok := err.(sqlite3.Error); ok {
-			errors.Is(sqliteErr, sqlite3.ErrConstraintUnique)
-			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique ||
-				sqliteErr.ExtendedCode == sqlite3.ErrConstraintPrimaryKey {
-				return data.createShortURL(meta)
-			}
-		}
 		return "", err
 	}
 
@@ -165,8 +158,8 @@ func (shortURL ShortURL) GetData() (urlData *URLData, err error) {
 		ip         sql.NullString
 		expired_at sql.NullString
 	)
-	row := db.QueryRow("SELECT * FROM urls WHERE id = ?", string(shortURL))
-	err = row.Scan(&id, &target_url, &meta, &count, &created_at, &created_by, &ip, &expired_at)
+	err = db.QueryRow("SELECT * FROM urls WHERE id = ?", string(shortURL)).Scan(
+		&id, &target_url, &meta, &count, &created_at, &created_by, &ip, &expired_at)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// not found
