@@ -21,7 +21,7 @@
 go.work
 
 # Data
-urls.json
+storage/
 
 # Environment
 *.env

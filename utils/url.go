@@ -1,14 +1,16 @@
 package utils
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"math/rand"
 	"os"
 	"regexp"
-	"sync"
+
+	"github.com/compose-spec/compose-go/dotenv"
+	"github.com/mattn/go-sqlite3"
 )
 
 var HOSTNAME string
@@ -25,13 +27,7 @@ type (
 
 var (
 	SHORT_LEN = len(SHORT_KEYS)
-	// short -> long
-	// [k: ShortURL as string]: LongURL as URLData struct
-	urlCache = map[ShortURL]URLData{}
-	// long -> short
-	// [k: LongURL as string]: ShortURL as string
-	longURLCache = map[LongURL]ShortURL{}
-	fileLock     sync.Mutex
+
 	// URL validation regex
 	reURL       = regexp.MustCompile(`^(https?://)([\S]+\.)?([^\s/]+\.[^\s/]{2,})(/?[\S]+)?$`)
 	reCustomURL = regexp.MustCompile(`^([\w\-]{1,32})$`)
@@ -41,11 +37,11 @@ var (
 )
 
 func init() {
+	dotenv.Load()
 	HOSTNAME = os.Getenv("HOSTNAME")
-	updateCacheURLData()
 }
 
-// Custom Meta
+// Custom Meta Data
 type CustomMeta struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -66,23 +62,8 @@ type URLData struct {
 }
 
 func (urlData *URLData) IncreaseCount() error {
-	urlData.Count++
-	urlCache[urlData.ShortURL] = *urlData
-
-	return saveCacheURLData()
-}
-
-func summonShortURL() ShortURL {
-	shortURL := ""
-	for i := 0; i < 6; i++ {
-		shortURL += string(SHORT_KEYS[rand.Intn(SHORT_LEN)])
-	}
-
-	if _, ok := urlCache[ShortURL(shortURL)]; ok {
-		return summonShortURL()
-	}
-
-	return ShortURL(shortURL)
+	_, err := db.Exec("UPDATE urls SET count = count + 1 WHERE id = ?", string(urlData.ShortURL))
+	return err
 }
 
 // API Requests Data
@@ -92,54 +73,127 @@ type CreateData struct {
 	Meta      *CustomMeta `json:"meta"`
 }
 
-func (data *CreateData) CreateShortURL() URLData {
+// Create a short URL
+func (data *CreateData) CreateShortURL() (*URLData, error) {
 	longURL := data.URL
-	shortURL := data.CustomURL
-	if shortURL == "" {
-		shortURL = summonShortURL()
+	var metaString any = nil
+	if data.Meta != nil {
+		metaBytes, err := json.Marshal(data.Meta)
+		if err != nil {
+			return nil, err
+		}
+		metaString = string(metaBytes)
+	}
+	shortURL, err := data.createShortURL(metaString)
+	if err != nil {
+		return nil, err
 	}
 
-	urlData := URLData{
-		ShortURL:  shortURL,
+	return &URLData{
+		ShortURL:  ShortURL(shortURL),
 		TargetURL: longURL,
 		Meta:      data.Meta,
-	}
-	urlCache[shortURL] = urlData
-	longURLCache[longURL] = shortURL
-	saveCacheURLData()
-
-	return urlData
+	}, nil
 }
 
-func (d *CreateData) InsertMeta() error {
-	data, err := ExtractHtmlMetaFromURL(string(d.URL))
+// Create a short URL (inner function)
+func (data *CreateData) createShortURL(meta any) (string, error) {
+	shortURL := ""
+	if data.CustomURL == "" {
+		for i := 0; i < 6; i++ {
+			shortURL += string(SHORT_KEYS[rand.Intn(SHORT_LEN)])
+		}
+	} else {
+		shortURL = string(data.CustomURL)
+	}
+
+	_, err := db.Exec("INSERT INTO urls (id, target_url, meta) VALUES (?, ?, ?)",
+		shortURL, data.URL, meta)
 	if err != nil {
-		log.Println("get meta error:", err)
+		if errors.Is(err, sqlite3.ErrConstraint) {
+			return data.createShortURL(meta)
+		}
+		if sqliteErr, ok := err.(sqlite3.Error); ok {
+			errors.Is(sqliteErr, sqlite3.ErrConstraintUnique)
+			if sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique ||
+				sqliteErr.ExtendedCode == sqlite3.ErrConstraintPrimaryKey {
+				return data.createShortURL(meta)
+			}
+		}
+		return "", err
+	}
+
+	return shortURL, nil
+}
+
+// Insert meta into short url
+func (data *CreateData) InsertMeta() error {
+	htmlMeta, err := ExtractHtmlMetaFromURL(string(data.URL))
+	if err != nil {
+		log.Println("Error getting meta:", err)
 		return err
 	}
 
-	meta := d.Meta
+	meta := data.Meta
 	if meta.Title == "" {
-		meta.Title = data.Title
+		meta.Title = htmlMeta.Title
 	}
 	if meta.Description == "" {
-		meta.Description = data.Description
+		meta.Description = htmlMeta.Description
 	}
 	if meta.ImageURL == "" {
-		meta.ImageURL = data.Image
+		meta.ImageURL = htmlMeta.Image
 	}
 	if meta.ThemeColor == "" {
-		meta.ThemeColor = data.ThemeColor
+		meta.ThemeColor = htmlMeta.ThemeColor
 	}
 
 	return nil
 }
 
-func (shortURL ShortURL) GetData() (urlData URLData, ok bool) {
-	urlData, ok = urlCache[shortURL]
-	return
+// ShortURL functions
+
+// Get url data from database
+func (shortURL ShortURL) GetData() (urlData *URLData, err error) {
+	var (
+		id         string
+		target_url string
+		meta       sql.NullString
+		count      int
+		created_at sql.NullString
+		created_by sql.NullString
+		ip         sql.NullString
+		expired_at sql.NullString
+	)
+	row := db.QueryRow("SELECT * FROM urls WHERE id = ?", string(shortURL))
+	err = row.Scan(&id, &target_url, &meta, &count, &created_at, &created_by, &ip, &expired_at)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// not found
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var customMeta *CustomMeta = &CustomMeta{}
+	if meta.Valid {
+		json.Unmarshal([]byte(meta.String), customMeta)
+	} else {
+		customMeta = nil
+	}
+
+	return &URLData{
+		ShortURL:  ShortURL(id),
+		TargetURL: LongURL(target_url),
+		Meta:      customMeta,
+		Count:     count,
+		// CreatedAt: created_at,
+		// CreatedBy: created_by,
+		// ExpiredAt: expired_at,
+	}, nil
 }
 
+// check if short url format is valid
 func (shortURL ShortURL) IsValid() error {
 	if len(string(shortURL)) > 32 {
 		return errors.New("custom url is too long")
@@ -155,19 +209,46 @@ func (shortURL ShortURL) IsValid() error {
 	return nil
 }
 
-func (longURL LongURL) GetShortURL() (shortURL ShortURL, ok bool) {
-	shortURL, ok = longURLCache[longURL]
-	return
-}
+// LongURL functions
 
-func (longURL LongURL) GetData() (URLData, bool) {
-	shortUrl, ok := longURL.GetShortURL()
-	if !ok {
-		return URLData{}, false
+// Check if long url meta which is in database is same as create data meta
+func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err error) {
+	rows, err := db.Query("SELECT id, meta FROM urls WHERE target_url = ?", string(longURL))
+	if err != nil {
+		return nil, err
 	}
-	return shortUrl.GetData()
+	defer rows.Close()
+
+	var CreateMeta string
+	if data.Meta == nil {
+		CreateMeta = ""
+	} else {
+		metaBytes, err := json.Marshal(data.Meta)
+		if err != nil {
+			return nil, err
+		}
+		CreateMeta = string(metaBytes)
+	}
+
+	for rows.Next() {
+		var (
+			id   string
+			meta sql.NullString
+		)
+		err := rows.Scan(&id, &meta)
+		if err != nil {
+			log.Println("Error found meta:", err)
+			continue
+		}
+		if meta.String == CreateMeta {
+			return &URLData{ShortURL: ShortURL(id)}, nil
+		}
+	}
+
+	return nil, nil
 }
 
+// Check if long url format is valid
 func (longURL LongURL) IsValid() error {
 	match := reURL.FindStringSubmatch(string(longURL))
 	if len(match) == 0 {
@@ -177,45 +258,4 @@ func (longURL LongURL) IsValid() error {
 		return errors.New("illegal url, you cannot redirect to " + HOSTNAME)
 	}
 	return nil
-}
-
-func updateCacheURLData() (err error) {
-	fileLock.Lock()
-	defer fileLock.Unlock()
-
-	fileContent, err := os.ReadFile(DATA_PATH)
-	if err != nil && !os.IsNotExist(err) {
-		fmt.Println("Error reading data file:", err)
-		return
-	}
-
-	if err = json.Unmarshal(fileContent, &urlCache); err != nil {
-		fmt.Println("Error parsing JSON:", err)
-		return
-	}
-
-	// Update longURLCache
-	for short, long := range urlCache {
-		longURLCache[long.TargetURL] = short
-	}
-
-	return
-}
-
-func saveCacheURLData() (err error) {
-	fileLock.Lock()
-	defer fileLock.Unlock()
-
-	data, err := json.Marshal(urlCache)
-	if err != nil {
-		fmt.Println("Error encoding JSON:", err)
-		return
-	}
-
-	if err = os.WriteFile(DATA_PATH, data, 0o644); err != nil {
-		fmt.Println("Error writing data file:", err)
-		return
-	}
-
-	return
 }
