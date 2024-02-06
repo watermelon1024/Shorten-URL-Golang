@@ -2,8 +2,7 @@ version: "2"
 
 services:
   shorten-url-golang:
-    # image: ghcr.io/watermelon1024/shorten-url-golang:latest
-    build: .
+    image: ghcr.io/watermelon1024/shorten-url-golang:latest
     ports:
       - "8080:8080"
     volumes:
