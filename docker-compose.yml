@@ -8,3 +8,6 @@ services:
       - "8080:8080"
     volumes:
       - surl-data:/app/data
+
+volumes:
+  surl-data:
