@@ -71,18 +71,18 @@ func main() {
 		data := utils.CreateData{}
 		if err := ctx.BindJSON(&data); err != nil {
 			// check data is valid
-			ctx.JSON(400, gin.H{"error": "invalid JSON"})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
 			return
 		}
 		data.URL = utils.LongURL(strings.TrimSpace(string(data.URL)))
 		// check whether url is empty
 		if data.URL == "" {
-			ctx.JSON(400, gin.H{"error": "original URL is required"})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "original URL is required"})
 			return
 		}
 		// check whether url format is valid
 		if err := data.URL.IsValid(); err != nil {
-			ctx.JSON(400, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		// check whether custom url has been used
@@ -91,7 +91,7 @@ func main() {
 			// check whether meta data is same
 			if urlDate, err := data.URL.CheckMetaSame(data); urlDate != nil {
 				// data exists and same, return it
-				ctx.JSON(200, gin.H{
+				ctx.JSON(http.StatusOK, gin.H{
 					"short": string(urlDate.ShortURL),
 					"url":   data.URL,
 					"meta":  data.Meta})
@@ -102,28 +102,28 @@ func main() {
 			}
 		} else if err := data.CustomURL.IsValid(); err != nil {
 			// check whether shortURL format is valid
-			ctx.JSON(400, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		} else if old, err := data.CustomURL.GetData(); old != nil {
 			// check whether shortURL has been used
 			if data.URL != old.TargetURL || data.Meta != old.Meta {
 				// used
-				ctx.JSON(400, gin.H{"error": "this custom url is already been used"})
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "this custom url is already been used"})
 			} else {
 				// same as old, return it
-				ctx.JSON(200, old)
+				ctx.JSON(http.StatusOK, old)
 			}
 			return
 		} else if err != nil {
 			// db error
-			ctx.JSON(500, gin.H{"error": "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
 		// if has meta, fill meta field
 		if data.Meta != nil {
 			// check whether image url format is valid
 			if data.Meta.ImageURL != "" && !data.Meta.ImageURLIsValid() {
-				ctx.JSON(400, gin.H{"error": "invalid image url"})
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid image url"})
 				return
 			}
 			data.InsertMeta()
@@ -132,24 +132,24 @@ func main() {
 		// create short url
 		urlDate, err := data.CreateShortURL()
 		if err != nil {
-			ctx.JSON(500, gin.H{"error": "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
 
-		ctx.JSON(201, urlDate)
+		ctx.JSON(http.StatusCreated, urlDate)
 	})
 
 	apiRouter.Use(utils.GetShortenLimiter).GET("/get/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
 		if urlData, err := shortenID.GetData(); urlData != nil {
-			ctx.JSON(200, urlData)
+			ctx.JSON(http.StatusOK, urlData)
 			return
 		} else if err != nil {
-			ctx.JSON(500, gin.H{"error": "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
 
-		ctx.JSON(404, gin.H{"error": "not found"})
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 	})
 
 	gin.ForceConsoleColor()
