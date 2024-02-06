@@ -220,9 +220,11 @@ func (shortURL ShortURL) GetData() (urlData *URLData, err error) {
 		return nil, err
 	}
 
-	var customMeta *CustomMeta = nil
+	var customMeta *CustomMeta = &CustomMeta{}
 	if meta.Valid {
 		json.Unmarshal([]byte(meta.String), customMeta)
+	} else {
+		customMeta = nil
 	}
 
 	return &URLData{

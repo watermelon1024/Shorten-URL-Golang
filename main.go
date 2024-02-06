@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -31,14 +30,14 @@ func main() {
 	log.Println("Git Commit:", GIT_COMMIT)
 
 	router := gin.Default()
-	router.NoRoute(AddFileHandler(webViews), func(c *gin.Context) {
+	router.LoadHTMLGlob("views/*.html")
+
+	router.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api") {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			c.Abort()
 		}
-	})
-
-	router.SetHTMLTemplate(template.Must(template.New("").ParseFS(webViews, "views/redirect.html")))
+	}, AddFileHandler(webViews))
 
 	router.Use(utils.RedirectLimiter).GET("/:id", func(ctx *gin.Context) {
 		shortenID := utils.ShortURL(strings.TrimSpace(ctx.Param("id")))
@@ -59,11 +58,12 @@ func main() {
 			})
 			return
 		} else if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			// server error
+			ctx.HTML(http.StatusInternalServerError, "500.html", gin.H{"error": "internal server error"})
 			return
 		}
-
-		AddFileHandler(webViews)(ctx)
+		// short url not found
+		ctx.HTML(http.StatusNotFound, "404.html", nil)
 	})
 
 	apiRouter := router.Group("/api")
