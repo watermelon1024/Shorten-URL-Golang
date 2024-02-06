@@ -21,8 +21,11 @@ var GIT_COMMIT string
 //go:embed all:views
 var webViews embed.FS
 
+var SUPPORT string
+
 func init() {
 	dotenv.Load()
+	SUPPORT = os.Getenv("SUPPORT")
 	gin.SetMode(strings.ToLower(os.Getenv("GIN_MODE")))
 }
 
@@ -59,7 +62,7 @@ func main() {
 			return
 		} else if err != nil {
 			// server error
-			ctx.HTML(http.StatusInternalServerError, "500.html", gin.H{"error": "internal server error"})
+			ctx.HTML(http.StatusInternalServerError, "500.html", gin.H{"support": SUPPORT})
 			return
 		}
 		// short url not found
