@@ -15,9 +15,11 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-X main.GIT_COMMIT=$GIT_COMMI
 FROM alpine
 WORKDIR /app
 COPY --from=builder /app/start .
+COPY --from=builder /app/views ./views
 
 VOLUME [ "/app/data" ]
 EXPOSE 8080
 ENV GIN_MODE=release
+ENV DB_PATH=/app/data/database.db
 
 CMD /app/start
