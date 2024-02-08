@@ -18,15 +18,15 @@ var (
 func init() {
 	// GET "/:id"
 	redirectRateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
-		Period: 3 * time.Second,
-		Limit:  3,
+		Period: 1 * time.Second,
+		Limit:  10,
 	})
 	RedirectLimiter = mgin.NewMiddleware(redirectRateLimiter, mgin.WithLimitReachedHandler(limitReachedHandler))
 
 	// GET "/api/get/:id"
 	getShortenRateLimiter := limiter.New(memory.NewStore(), limiter.Rate{
 		Period: 10 * time.Minute,
-		Limit:  50,
+		Limit:  100,
 	})
 	GetShortenLimiter = mgin.NewMiddleware(getShortenRateLimiter, mgin.WithLimitReachedHandler(limitReachedHandler))
 
