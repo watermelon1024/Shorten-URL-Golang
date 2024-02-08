@@ -80,10 +80,12 @@ func (data *CreateData) CreateShortURL() (*URLData, error) {
 	if data.Meta != nil {
 		metaBytes, err := json.Marshal(data.Meta)
 		if err != nil {
+			log.Println("Error marshalling meta:", err)
 			return nil, err
 		}
 		metaString = string(metaBytes)
 	}
+
 	shortURL, err := data.createShortURL(metaString)
 	if err != nil {
 		return nil, err
@@ -117,6 +119,7 @@ func (data *CreateData) createShortURL(meta any) (string, error) {
 				return data.createShortURL(meta)
 			}
 		}
+		log.Println("Error inserting url:", err)
 		return "", err
 	}
 
@@ -169,10 +172,11 @@ func (shortURL ShortURL) GetData() (urlData *URLData, err error) {
 			// not found
 			return nil, nil
 		}
+		log.Println("Error getting url data:", err)
 		return nil, err
 	}
 
-	var customMeta *CustomMeta = &CustomMeta{}
+	customMeta := &CustomMeta{}
 	if meta.Valid {
 		json.Unmarshal([]byte(meta.String), customMeta)
 	} else {
@@ -210,12 +214,6 @@ func (shortURL ShortURL) IsValid() error {
 
 // Check if long url meta which is in database is same as create data meta
 func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err error) {
-	rows, err := db.Query("SELECT id, meta FROM urls WHERE target_url = ?", string(longURL))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
 	var CreateMeta string
 	if data.Meta == nil {
 		CreateMeta = ""
@@ -226,6 +224,13 @@ func (longURL LongURL) CheckMetaSame(data CreateData) (urlData *URLData, err err
 		}
 		CreateMeta = string(metaBytes)
 	}
+
+	rows, err := db.Query("SELECT id, meta FROM urls WHERE target_url = ?", string(longURL))
+	if err != nil {
+		log.Println("Error getting url data:", err)
+		return nil, err
+	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var (
