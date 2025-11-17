@@ -21,10 +21,22 @@ var GIT_COMMIT string
 //go:embed all:views
 var webViews embed.FS
 
-var SUPPORT string
+var (
+	HOST    string
+	PORT    string
+	SUPPORT string
+)
 
 func init() {
 	dotenv.Load()
+	HOST = os.Getenv("HOST")
+	if HOST == "" {
+		HOST = "0.0.0.0"
+	}
+	PORT = os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "8080"
+	}
 	SUPPORT = os.Getenv("SUPPORT")
 	gin.SetMode(strings.ToLower(os.Getenv("GIN_MODE")))
 }
@@ -157,7 +169,7 @@ func main() {
 
 	gin.ForceConsoleColor()
 	srv := &http.Server{
-		Addr:    "0.0.0.0:8080",
+		Addr:    HOST + ":" + PORT,
 		Handler: router,
 	}
 

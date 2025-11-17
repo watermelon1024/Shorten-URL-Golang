@@ -1,4 +1,4 @@
-FROM golang:alpine as builder
+FROM golang:alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -19,7 +19,9 @@ COPY --from=builder /app/views ./views
 
 VOLUME [ "/app/data" ]
 EXPOSE 8080
+ENV HOST=0.0.0.0
+ENV PORT=8080
 ENV GIN_MODE=release
 ENV DB_PATH=/app/data/database.db
 
-CMD /app/start
+CMD [ "/app/start" ]
