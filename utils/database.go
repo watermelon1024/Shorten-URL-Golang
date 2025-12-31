@@ -15,6 +15,9 @@ var db *sql.DB
 func init() {
 	dotenv.Load()
 	dbFilePath := os.Getenv("DB_PATH")
+	if dbFilePath == "" {
+		dbFilePath = "storage/database.db"
+	}
 
 	var err error
 	// check/create database dir
